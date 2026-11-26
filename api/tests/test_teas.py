@@ -8,19 +8,19 @@ async def setup_two(client):
     return slug, created["token"], other["token"]
 
 
-async def add_tea(client, slug, token, name, ingredients=()):
+async def add_new_tea(client, slug, token, name, ingredients=(), **extra):
     res = await client.post(
         f"/api/rooms/{slug}/teas",
-        json={"name": name, "ingredients": list(ingredients)},
+        json={"new_tea": {"name": name, "ingredients": list(ingredients), **extra}},
         headers=auth(token),
     )
     assert res.status_code == 201, res.text
     return res.json()
 
 
-async def rate(client, slug, token, tea_id, overall, **extra):
+async def rate(client, slug, token, tasting_id, overall, **extra):
     res = await client.put(
-        f"/api/rooms/{slug}/teas/{tea_id}/rating",
+        f"/api/rooms/{slug}/teas/{tasting_id}/rating",
         json={"overall": overall, **extra},
         headers=auth(token),
     )
@@ -28,67 +28,135 @@ async def rate(client, slug, token, tea_id, overall, **extra):
     return res.json()
 
 
-async def test_add_tea_cleans_ingredients(client):
+async def reveal_scores(client, slug, token, tasting_id):
+    res = await client.patch(
+        f"/api/rooms/{slug}/teas/{tasting_id}/visibility",
+        json={"scores_revealed": True},
+        headers=auth(token),
+    )
+    assert res.status_code == 200, res.text
+
+
+async def test_new_tea_goes_into_catalog_and_room(client):
     slug, me, _ = await setup_two(client)
-    tea = await add_tea(
+    tasting = await add_new_tea(
         client, slug, me, "  Angel   kiss ", [" vanilla", "Vanilla", "", "rose  hip"]
     )
-    assert tea["name"] == "Angel kiss"
-    assert tea["ingredients"] == ["vanilla", "rose hip"]
+    assert tasting["tea"]["name"] == "Angel kiss"
+    assert [i["name"] for i in tasting["tea"]["ingredients"]] == ["vanilla", "rose hip"]
+    catalog = (await client.get("/api/catalog/teas", headers=auth(me))).json()
+    assert [(t["name"], t["room_count"]) for t in catalog] == [("Angel kiss", 1)]
 
 
-async def test_others_ratings_hidden_until_you_rate(client):
+async def test_same_tea_in_two_rooms_keeps_ratings_apart(client):
+    slug, me, _ = await setup_two(client)
+    tasting = await add_new_tea(client, slug, me, "Sencha")
+    await rate(client, slug, me, tasting["id"], 9)
+
+    other = await make_room(client, "Friday", "Ola")
+    res = await client.post(
+        f"/api/rooms/{other['room']['slug']}/teas",
+        json={"tea_id": tasting["tea"]["id"]},
+        headers=auth(other["token"]),
+    )
+    assert res.status_code == 201, res.text
+    assert res.json()["rating_count"] == 0
+    assert res.json()["tea"]["room_count"] == 2
+
+    again = await client.post(
+        f"/api/rooms/{slug}/teas", json={"tea_id": tasting["tea"]["id"]}, headers=auth(me)
+    )
+    assert again.status_code == 409
+
+
+async def test_new_tea_with_taken_name_is_rejected(client):
+    slug, me, _ = await setup_two(client)
+    await add_new_tea(client, slug, me, "Sencha")
+    other = await make_room(client, "Friday", "Ola")
+    res = await client.post(
+        f"/api/rooms/{other['room']['slug']}/teas",
+        json={"new_tea": {"name": "SENCHA"}},
+        headers=auth(other["token"]),
+    )
+    assert res.status_code == 409
+
+
+async def test_scores_hidden_until_anyone_reveals_them(client):
     slug, me, other = await setup_two(client)
-    tea = await add_tea(client, slug, me, "Gingerbread")
-    await rate(client, slug, other, tea["id"], 8, note="lovely")
+    tasting = await add_new_tea(client, slug, me, "Gingerbread")
+    await rate(client, slug, other, tasting["id"], 8, note="lovely")
+    after = await rate(client, slug, me, tasting["id"], 6, smell=7, buy_again=True)
 
-    before = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(me))).json()[0]
-    assert before["ratings"] is None
-    assert before["average_overall"] is None
-    assert before["rating_count"] == 1
-
-    after = await rate(client, slug, me, tea["id"], 6, smell=7, buy_again=True)
     assert after["my_rating"]["overall"] == 6
-    assert after["average_overall"] == 7
-    assert {r["participant"]["display_name"] for r in after["ratings"]} == {"Sashka", "Michutek"}
+    assert after["ratings"] is None and after["average_overall"] is None
+    assert after["rating_count"] == 2
+
+    res = await client.patch(
+        f"/api/rooms/{slug}/teas/{tasting['id']}/visibility",
+        json={"scores_revealed": True},
+        headers=auth(other),
+    )
+    assert res.status_code == 200
+    seen = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(me))).json()[0]
+    assert seen["scores_revealed"] is True and seen["average_overall"] == 7
+    assert {r["participant"]["display_name"] for r in seen["ratings"]} == {"Sashka", "Michutek"}
+
+    res = await client.patch(
+        f"/api/rooms/{slug}/teas/{tasting['id']}/visibility",
+        json={"scores_revealed": False},
+        headers=auth(me),
+    )
+    assert res.json()["ratings"] is None and res.json()["average_overall"] is None
 
 
 async def test_rating_is_updated_not_duplicated(client):
     slug, me, _ = await setup_two(client)
-    tea = await add_tea(client, slug, me, "Nantou")
-    await rate(client, slug, me, tea["id"], 3)
-    again = await rate(client, slug, me, tea["id"], 9)
+    tasting = await add_new_tea(client, slug, me, "Nantou")
+    await rate(client, slug, me, tasting["id"], 3)
+    again = await rate(client, slug, me, tasting["id"], 9)
     assert again["rating_count"] == 1
     assert again["my_rating"]["overall"] == 9
 
 
 async def test_score_out_of_range_is_rejected(client):
     slug, me, _ = await setup_two(client)
-    tea = await add_tea(client, slug, me, "Nantou")
+    tasting = await add_new_tea(client, slug, me, "Nantou")
     res = await client.put(
-        f"/api/rooms/{slug}/teas/{tea['id']}/rating", json={"overall": 11}, headers=auth(me)
+        f"/api/rooms/{slug}/teas/{tasting['id']}/rating", json={"overall": 11}, headers=auth(me)
     )
     assert res.status_code == 422
 
 
-async def test_only_creator_deletes_tea(client):
-    slug, me, other = await setup_two(client)
-    tea = await add_tea(client, slug, me, "Sticky rice")
-    url = f"/api/rooms/{slug}/teas/{tea['id']}"
-    assert (await client.delete(url, headers=auth(other))).status_code == 403
-    assert (await client.delete(url, headers=auth(me))).status_code == 204
-    assert (await client.get(f"/api/rooms/{slug}/teas", headers=auth(me))).json() == []
+async def test_only_host_adds_and_removes_teas(client):
+    slug, host, guest = await setup_two(client)
+    res = await client.post(
+        f"/api/rooms/{slug}/teas", json={"new_tea": {"name": "Puerh"}}, headers=auth(guest)
+    )
+    assert res.status_code == 403
+
+    tasting = await add_new_tea(client, slug, host, "Sticky rice")
+    url = f"/api/rooms/{slug}/teas/{tasting['id']}"
+    assert (await client.delete(url, headers=auth(guest))).status_code == 403
+    assert (await client.delete(url, headers=auth(host))).status_code == 204
+    assert (await client.get(f"/api/rooms/{slug}/teas", headers=auth(host))).json() == []
+    catalog = (await client.get("/api/catalog/teas", headers=auth(host))).json()
+    assert [t["name"] for t in catalog] == ["Sticky rice"]
 
 
 async def test_analytics_compares_with_own_average(client):
     slug, me, other = await setup_two(client)
-    a = await add_tea(client, slug, me, "Citrus one", ["Lemon", "green tea"])
-    b = await add_tea(client, slug, me, "Spicy one", ["Ginger", "black tea"])
+    a = await add_new_tea(client, slug, me, "Citrus one", ["Lemon", "green tea"])
+    b = await add_new_tea(client, slug, me, "Spicy one", ["Ginger", "black tea"])
     await rate(client, slug, me, a["id"], 8)
     await rate(client, slug, me, b["id"], 4)
     await rate(client, slug, other, a["id"], 10)
     await rate(client, slug, other, b["id"], 10)
 
+    hidden = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert hidden["tea_count"] == 2 and hidden["rating_count"] == 0 and hidden["ranking"] == []
+
+    await reveal_scores(client, slug, me, a["id"])
+    await reveal_scores(client, slug, me, b["id"])
     data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
     assert data["tea_count"] == 2 and data["rating_count"] == 4
     assert [r["name"] for r in data["ranking"]] == ["Citrus one", "Spicy one"]
@@ -100,3 +168,71 @@ async def test_analytics_compares_with_own_average(client):
 
     pair = data["agreement"][0]
     assert pair["shared_teas"] == 2 and pair["mean_difference"] == 4.0
+
+
+async def test_blind_room_hides_tea_until_anyone_reveals(client):
+    created = await client.post(
+        "/api/rooms",
+        json={"name": "Blind", "password": "tea-time", "display_name": "Host", "blind": True},
+    )
+    slug, host = created.json()["room"]["slug"], created.json()["token"]
+    guest = (await join(client, slug, "Guest")).json()["token"]
+    tasting = await add_new_tea(client, slug, host, "Secret Sencha", ["green tea"])
+    assert tasting["hidden"] is True and tasting["tea"] is None
+
+    seen = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(guest))).json()[0]
+    assert seen["tea"] is None
+    await rate(client, slug, guest, tasting["id"], 8)
+    await reveal_scores(client, slug, guest, tasting["id"])
+    ranking = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(guest))).json()
+    assert ranking["ranking"][0]["name"] == "Mystery tea #1"
+    assert ranking["ingredients"] == []
+
+    url = f"/api/rooms/{slug}/teas/{tasting['id']}/visibility"
+    res = await client.patch(url, json={"revealed": True}, headers=auth(guest))
+    assert res.status_code == 200
+    seen = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(host))).json()[0]
+    assert seen["hidden"] is False and seen["tea"]["name"] == "Secret Sencha"
+
+    hidden_again = await client.patch(url, json={"revealed": False}, headers=auth(host))
+    assert hidden_again.json()["hidden"] is True and hidden_again.json()["tea"] is None
+
+
+async def test_anonymous_room_hides_who_rated(client):
+    created = await client.post(
+        "/api/rooms",
+        json={
+            "name": "Anon",
+            "password": "tea-time",
+            "display_name": "Host",
+            "blind": False,
+            "anonymous": True,
+        },
+    )
+    slug, host = created.json()["room"]["slug"], created.json()["token"]
+    guest = (await join(client, slug, "Guest")).json()["token"]
+    tasting = await add_new_tea(client, slug, host, "Oolong")
+    await rate(client, slug, guest, tasting["id"], 4, note="meh")
+    await rate(client, slug, host, tasting["id"], 9)
+    res = await client.patch(
+        f"/api/rooms/{slug}/teas/{tasting['id']}/visibility",
+        json={"scores_revealed": True},
+        headers=auth(guest),
+    )
+    after = res.json()
+
+    assert all(r["participant"] is None for r in after["ratings"])
+    assert sorted(r["is_mine"] for r in after["ratings"]) == [False, True]
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(host))).json()
+    assert data["anonymous"] is True
+    assert data["people"] == [] and data["agreement"] == []
+
+
+async def test_only_host_changes_room_settings(client):
+    slug, host, guest = await setup_two(client)
+    res = await client.patch(f"/api/rooms/{slug}", json={"blind": False}, headers=auth(guest))
+    assert res.status_code == 403
+    res = await client.patch(
+        f"/api/rooms/{slug}", json={"blind": False, "anonymous": True}, headers=auth(host)
+    )
+    assert res.json()["room"]["blind"] is False and res.json()["room"]["anonymous"] is True

@@ -1,56 +1,19 @@
-import { useMutation } from '@tanstack/react-query'
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useState } from 'react'
+import { Link } from 'react-router'
 
-import { Field } from '../components/Field'
+import { ItemIcon } from '../components/ItemIcon'
+import { Heading, KindIcon } from '../components/KindIcon'
 import { Leaf } from '../components/Leaf'
-import { api, type Session } from '../lib/api'
-import { saveRoom, savedRooms } from '../lib/sessions'
-
-function remember(session: Session) {
-  saveRoom({
-    slug: session.room.slug,
-    name: session.room.name,
-    token: session.token,
-    me: session.me.display_name,
-  })
-}
-
-function roomCodeFrom(input: string): string {
-  const trimmed = input.trim()
-  const match = trimmed.match(/\/r\/([a-z0-9]+)/i)
-  return (match ? match[1] : trimmed).toLowerCase()
-}
+import { LikedTeas } from '../components/LikedTeas'
+import { forgetRoom, savedRooms } from '../lib/sessions'
+import { useConfirm } from '../components/Confirm'
 
 export function HomePage() {
-  const navigate = useNavigate()
-  const rooms = savedRooms()
-
-  const [create, setCreate] = useState({ name: '', password: '', display_name: '' })
-  const [join, setJoin] = useState({ code: '', password: '', display_name: '' })
-
-  const createRoom = useMutation({
-    mutationFn: () => api.createRoom(create),
-    onSuccess: (session) => {
-      remember(session)
-      navigate(`/r/${session.room.slug}`)
-    },
-  })
-  const joinRoom = useMutation({
-    mutationFn: () =>
-      api.joinRoom(roomCodeFrom(join.code), {
-        password: join.password,
-        display_name: join.display_name,
-      }),
-    onSuccess: (session) => {
-      remember(session)
-      navigate(`/r/${session.room.slug}`)
-    },
-  })
-
-  const submit = (run: () => void) => (e: FormEvent) => {
-    e.preventDefault()
-    run()
+  const [rooms, setRooms] = useState(savedRooms)
+  const [confirmDialog, confirm] = useConfirm()
+  const removeFromDevice = (slug: string) => {
+    forgetRoom(slug)
+    setRooms(savedRooms())
   }
 
   return (
@@ -61,93 +24,66 @@ export function HomePage() {
         </span>
         <h1>Tea Ceremony</h1>
         <p className="muted center">Taste teas together, rate them, and find out what you all like.</p>
+        <div className="actions home-actions">
+          <Link to="/new" className="primary">
+            + New room
+          </Link>
+          <Link to="/join" className="ghost big">
+            Join a room
+          </Link>
+          <Link to="/catalog" className="ghost big with-icon">
+            <KindIcon kind="catalog" size={18} />
+            Tea catalog
+          </Link>
+        </div>
       </header>
 
-      {rooms.length > 0 && (
-        <section className="panel">
-          <span className="label">Your rooms</span>
-          <ul className="room-list">
-            {rooms.map((r) => (
-              <li key={r.slug}>
-                <Link to={`/r/${r.slug}`} className="room-link">
-                  <b>{r.name}</b>
-                  <span className="muted">as {r.me}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {rooms.length > 0 ? (
+        <>
+          <section className="panel">
+            <div className="row-between">
+              <Heading kind="room">Your rooms</Heading>
+              <span className="muted small">Saved in this browser</span>
+            </div>
+            <ul className="room-list">
+              {rooms.map((r) => (
+                <li key={r.slug} className="room-item">
+                  <Link to={`/r/${r.slug}`} className="room-link">
+                    <ItemIcon name={r.icon ?? 'lantern'} colorFrom={r.name} badge size={24} />
+                    <span className="tea-main">
+                      <b>{r.name}</b>
+                      <span className="tea-sub">as {r.me}</span>
+                    </span>
+                  </Link>
+                  <button
+                    className="icon-btn"
+                    onClick={() =>
+                      confirm({
+                        title: 'Remove this room from your list?',
+                        message: `“${r.name}” will be forgotten on this device. The room itself stays, and you can join it again with its code and password.`,
+                        confirmLabel: 'Remove',
+                        danger: true,
+                        action: () => removeFromDevice(r.slug),
+                      })
+                    }
+                    aria-label={`Remove ${r.name} from this browser`}
+                    title="Remove from this browser"
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <LikedTeas rooms={rooms} />
+        </>
+      ) : (
+        <div className="notice">
+          No rooms yet. Create one and send the code to your friends, or join a room someone shared with
+          you.
+        </div>
       )}
-
-      <div className="two-col">
-        <form className="panel" onSubmit={submit(() => createRoom.mutate())}>
-          <h2>New room</h2>
-          <Field
-            id="create-name"
-            label="Room name"
-            required
-            maxLength={80}
-            value={create.name}
-            onChange={(e) => setCreate({ ...create, name: e.target.value })}
-            placeholder="Advent calendar 2026"
-          />
-          <Field
-            id="create-password"
-            label="Room password"
-            type="password"
-            required
-            minLength={4}
-            value={create.password}
-            onChange={(e) => setCreate({ ...create, password: e.target.value })}
-            hint="Everyone joining needs it. At least 4 characters."
-          />
-          <Field
-            id="create-me"
-            label="Your name"
-            required
-            maxLength={40}
-            value={create.display_name}
-            onChange={(e) => setCreate({ ...create, display_name: e.target.value })}
-          />
-          {createRoom.error && <p className="error">{createRoom.error.message}</p>}
-          <button className="primary" disabled={createRoom.isPending}>
-            {createRoom.isPending ? 'Creating…' : 'Create room'}
-          </button>
-        </form>
-
-        <form className="panel" onSubmit={submit(() => joinRoom.mutate())}>
-          <h2>Join a room</h2>
-          <Field
-            id="join-code"
-            label="Room code or link"
-            required
-            value={join.code}
-            onChange={(e) => setJoin({ ...join, code: e.target.value })}
-            placeholder="k7m2pqxa"
-          />
-          <Field
-            id="join-password"
-            label="Room password"
-            type="password"
-            required
-            value={join.password}
-            onChange={(e) => setJoin({ ...join, password: e.target.value })}
-          />
-          <Field
-            id="join-me"
-            label="Your name"
-            required
-            maxLength={40}
-            value={join.display_name}
-            onChange={(e) => setJoin({ ...join, display_name: e.target.value })}
-            hint="Already in this room? Use the same name to continue as yourself."
-          />
-          {joinRoom.error && <p className="error">{joinRoom.error.message}</p>}
-          <button className="primary" disabled={joinRoom.isPending}>
-            {joinRoom.isPending ? 'Joining…' : 'Join room'}
-          </button>
-        </form>
-      </div>
+      {confirmDialog}
     </main>
   )
 }

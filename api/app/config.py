@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=REPO_ROOT / ".env", extra="ignore")
 
     database_url: str = f"sqlite+aiosqlite:///{API_ROOT / 'tea_ceremony.db'}"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5190"
     static_dir: str = str(REPO_ROOT / "web" / "dist")
     max_failed_joins: int = 10
     failed_join_window_seconds: int = 600

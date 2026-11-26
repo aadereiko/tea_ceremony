@@ -2,7 +2,7 @@ from collections import defaultdict
 from itertools import combinations
 from statistics import mean
 
-from app.models import SCORE_FIELDS, Participant, Rating, Tea
+from app.models import SCORE_FIELDS, Rating, Room, Tasting, is_hidden
 from app.schemas import (
     Agreement,
     Analytics,
@@ -18,11 +18,11 @@ def _avg(values: list[int | float | None]) -> float | None:
     return round(mean(present), 2) if present else None
 
 
-def ingredient_key(name: str) -> str:
-    return " ".join(name.lower().split())
-
-
-def build_analytics(teas: list[Tea], people: list[Participant]) -> Analytics:
+def build_analytics(all_teas: list[Tasting], room: Room) -> Analytics:
+    people = list(room.participants)
+    # Scores nobody has revealed must not leak through averages, so they are left out entirely.
+    teas = [t for t in all_teas if t.scores_revealed]
+    position = {t.id: n for n, t in enumerate(all_teas, start=1)}
     ratings: list[Rating] = [r for t in teas for r in t.ratings]
     by_person: dict[str, list[Rating]] = defaultdict(list)
     for r in ratings:
@@ -30,8 +30,11 @@ def build_analytics(teas: list[Tea], people: list[Participant]) -> Analytics:
 
     ranking = [
         TeaRank(
-            tea_id=t.id,
-            name=t.name,
+            tasting_id=t.id,
+            hidden=is_hidden(t, room),
+            icon="mystery" if is_hidden(t, room) else t.tea.icon,
+            color=None if is_hidden(t, room) else t.tea.color,
+            name=f"Mystery tea #{position[t.id]}" if is_hidden(t, room) else t.tea.name,
             rating_count=len(t.ratings),
             average_overall=_avg([r.overall for r in t.ratings]),
             average_by_field={f: _avg([getattr(r, f) for r in t.ratings]) for f in SCORE_FIELDS},
@@ -60,9 +63,10 @@ def build_analytics(teas: list[Tea], people: list[Participant]) -> Analytics:
     diffs: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     labels: dict[str, str] = {}
     tea_counts: dict[str, int] = defaultdict(int)
-    for t in teas:
-        keys = {ingredient_key(i): i for i in t.ingredients}
-        for key, label in keys.items():
+    # A hidden tea's ingredients would hint at what it is, so only revealed teas count here.
+    for t in (t for t in teas if not is_hidden(t, room)):
+        for link in t.tea.ingredient_links:
+            key, label = str(link.ingredient_id), link.ingredient.name
             labels.setdefault(key, label)
             tea_counts[key] += 1
             for r in t.ratings:
@@ -81,7 +85,7 @@ def build_analytics(teas: list[Tea], people: list[Participant]) -> Analytics:
     ]
     ingredients.sort(key=lambda row: (row.relative_all is None, -(row.relative_all or 0)))
 
-    overall_of = {(str(r.participant_id), r.tea_id): r.overall for r in ratings}
+    overall_of = {(str(r.participant_id), r.tasting_id): r.overall for r in ratings}
     agreement = []
     for a, b in combinations(people, 2):
         gaps = [
@@ -99,8 +103,15 @@ def build_analytics(teas: list[Tea], people: list[Participant]) -> Analytics:
             )
         )
 
+    if room.anonymous:
+        # Each of these is per person, which is exactly what an anonymous room promises to hide.
+        summaries, agreement = [], []
+        for row in ingredients:
+            row.relative_by_person = {}
+
     return Analytics(
-        tea_count=len(teas),
+        anonymous=room.anonymous,
+        tea_count=len(all_teas),
         rating_count=len(ratings),
         ranking=ranking,
         people=summaries,

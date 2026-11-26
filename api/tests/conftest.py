@@ -36,7 +36,8 @@ def auth(token: str) -> dict[str, str]:
 
 async def make_room(client: AsyncClient, name: str = "Advent", who: str = "Sashka") -> dict:
     res = await client.post(
-        "/api/rooms", json={"name": name, "password": "tea-time", "display_name": who}
+        "/api/rooms",
+        json={"name": name, "password": "tea-time", "display_name": who, "blind": False},
     )
     assert res.status_code == 201, res.text
     return res.json()

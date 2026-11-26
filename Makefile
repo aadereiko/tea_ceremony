@@ -14,7 +14,7 @@ migrate: ## Create or update the database tables
 api: migrate ## Run the API on :8000 with reload
 	cd api && uv run uvicorn app.main:app --reload --port 8000
 
-web: ## Run the website on :5173 (talks to the API on :8000)
+web: ## Run the website on :5190 (talks to the API on :8000)
 	cd web && npm run dev
 
 test: ## Run every test, lint and type check

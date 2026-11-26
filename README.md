@@ -13,12 +13,29 @@ likes in the Analytics tab.
 
 - **Rooms** have a name, a password and a random 8-letter code (`/r/<code>`). The password is
   stored only as an argon2 hash. After 10 wrong passwords in 10 minutes a room stops accepting
-  joins for a while.
+  joins for a while. Whoever creates a room is its host, and only the host can delete it, which
+  removes its teas and ratings for everyone.
 - **Names are unique per room**, ignoring case and extra spaces ("Anna" = " anna "). Joining
   again with the same name continues as that person, which is how you get back in on a new
   phone. Anyone who knows the room password can do that, so the password is what protects a room.
 - **Sessions:** joining returns a random token the browser keeps in `localStorage` and sends as
   `Authorization: Bearer ...`. The database only stores a SHA-256 of it.
+- **Tea catalog:** teas and their ingredients live in one catalog shared by every room
+  (`/catalog`). A room picks teas from it, or adds new ones to it. Ratings belong to the room,
+  so the same tea tasted in two rooms keeps separate scores. A catalog tea can only be deleted
+  once no room is tasting it. Anyone who is in any room can edit the catalog.
+- **The host** adds teas to the room and changes its settings. Everyone can rate, reveal and hide.
+- **Scores** stay hidden until anyone reveals them for a tea (and can be hidden again). Analytics
+  only count teas whose scores are revealed, so hidden scores can't leak through averages.
+- **Room settings** (the host can change them any time):
+  - *Blind tasting* (on by default): teas show as "Mystery tea #n" until anyone in the room
+    reveals them. The server leaves the name, ingredients and colour out of its replies, so
+    hidden teas can't be read from the browser either.
+  - *Anonymous ratings*: no names next to scores or notes, and per-person analytics are hidden.
+- **Icons:** rooms, people (animals) and teas each have their own set of drawn icons
+  (`web/src/lib/illustrations.tsx`), picked by the user or at random. The database stores the
+  icon's name, and the API only accepts names from the right set. Teas also have a brew colour
+  from a fixed list of real tea colours (`web/src/lib/icons.ts`).
 - **Ratings:** Smell, Taste, Finish, Overall (0 to 10), Would buy again, and a note. Other
   people's scores for a tea stay hidden until you've rated it yourself.
 - **Analytics:** ranking by average Overall, each taster's averages, ingredient preferences
@@ -32,7 +49,7 @@ Needs [uv](https://docs.astral.sh/uv/) and Node 22+.
 ```bash
 make install
 make api     # terminal 1: API on http://localhost:8000 (creates api/tea_ceremony.db)
-make web     # terminal 2: website on http://localhost:5173
+make web     # terminal 2: website on http://localhost:5190
 ```
 
 `make test` runs the API tests, lint, the frontend type check and frontend tests.
