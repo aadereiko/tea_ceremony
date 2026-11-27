@@ -1,27 +1,40 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import type { TeaInput } from '../lib/api'
-import { splitIngredients } from '../lib/format'
+import type { IngredientRef, TeaInput } from '../lib/api'
+import { TEA_COLORS, TEA_ICONS, teaColor } from '../lib/icons'
+import { IconPicker } from './IconPicker'
+import { IngredientCombobox } from './IngredientCombobox'
 
 type Props = {
   initial?: TeaInput
+  known: IngredientRef[]
   submitLabel: string
   pending: boolean
   error: string | null
   onSubmit: (tea: TeaInput) => void
 }
 
-export function TeaForm({ initial, submitLabel, pending, error, onSubmit }: Props) {
+export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit }: Props) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [ingredients, setIngredients] = useState(initial?.ingredients.join(', ') ?? '')
+  const [ingredients, setIngredients] = useState(initial?.ingredients ?? [])
+  const [icon, setIcon] = useState(initial?.icon ?? null)
+  const [color, setColor] = useState(initial?.color ?? null)
   const [notes, setNotes] = useState(initial?.notes ?? '')
+  // An error belongs to the values that caused it; hide it once the user changes anything.
+  const [edited, setEdited] = useState(false)
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (mounted.current) setEdited(true)
+    mounted.current = true
+  }, [name, ingredients, icon, color, notes])
 
   return (
     <form
       className="stack"
       onSubmit={(e) => {
         e.preventDefault()
-        onSubmit({ name, ingredients: splitIngredients(ingredients), notes })
+        setEdited(false)
+        onSubmit({ name, ingredients, icon, color, notes })
       }}
     >
       <label className="field" htmlFor="tea-name">
@@ -35,17 +48,39 @@ export function TeaForm({ initial, submitLabel, pending, error, onSubmit }: Prop
           placeholder="Angel kiss"
         />
       </label>
-      <label className="field" htmlFor="tea-ingredients">
-        <span className="label">Ingredients</span>
-        <textarea
+      <IconPicker label="Icon" icons={TEA_ICONS} value={icon} onChange={setIcon} />
+      <fieldset className="crit">
+        <legend className="label">Colour of the brew</legend>
+        <div className="swatches">
+          {TEA_COLORS.map((c, i) => (
+            <button
+              type="button"
+              key={c.key}
+              className={`swatch tip ${i < TEA_COLORS.length / 2 ? 'tip-start' : 'tip-end'}${color === c.key ? ' on' : ''}`}
+              style={{ background: c.hex }}
+              data-tip={`${c.name}: ${c.teas}`}
+              aria-label={`${c.name}, like ${c.teas}`}
+              aria-pressed={color === c.key}
+              onClick={() => setColor(color === c.key ? null : c.key)}
+            />
+          ))}
+        </div>
+        <small className="muted">
+          {teaColor(color) ? `${teaColor(color)!.name}, like ${teaColor(color)!.teas}.` : 'Hover a colour to see which teas brew like it.'}
+        </small>
+      </fieldset>
+      <div className="field">
+        <label className="label" htmlFor="tea-ingredients">
+          Ingredients
+        </label>
+        <IngredientCombobox
           id="tea-ingredients"
-          rows={2}
           value={ingredients}
-          onChange={(e) => setIngredients(e.target.value)}
-          placeholder="white tea, vanilla, bergamot, marigold"
+          options={known}
+          onChange={setIngredients}
         />
-        <small className="muted">Separate with commas. Leave empty if you don't know them.</small>
-      </label>
+        <small className="muted">Pick from the catalog or type a new one. Leave empty if you don't know.</small>
+      </div>
       <label className="field" htmlFor="tea-notes">
         <span className="label">Notes</span>
         <textarea
@@ -57,7 +92,7 @@ export function TeaForm({ initial, submitLabel, pending, error, onSubmit }: Prop
           placeholder="Brew at 80 °C for 4 minutes"
         />
       </label>
-      {error && <p className="error">{error}</p>}
+      {error && !edited && <p className="error">{error}</p>}
       <button className="primary" disabled={pending}>
         {pending ? 'Saving…' : submitLabel}
       </button>

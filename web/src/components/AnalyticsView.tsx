@@ -3,6 +3,10 @@ import { useState } from 'react'
 
 import { api, SCORE_FIELDS } from '../lib/api'
 import { fmt, signed } from '../lib/format'
+import { Heading } from './KindIcon'
+import { ItemIcon } from './ItemIcon'
+import { TeaBadge } from './TeaBadge'
+import { Link } from 'react-router'
 
 const MIN_TEA_OPTIONS = [1, 2, 3, 4]
 
@@ -53,22 +57,29 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
         </div>
         <div>
           <b>{data.rating_count}</b>
-          <span className="label">Ratings</span>
+          <span className="label">Revealed ratings</span>
         </div>
         <div>
-          <b>{data.people.filter((p) => p.rated > 0).length}</b>
+          <b>{data.taster_count}</b>
           <span className="label">Tasters</span>
         </div>
       </div>
 
+      <p className="muted small">Only teas whose scores have been revealed are counted here.</p>
+
       <section className="stack-sm">
-        <h3>Ranking</h3>
+        <Heading kind="tea" level={3}>
+          Ranking
+        </Heading>
         <ol className="ranking">
           {data.ranking.map((r, i) => (
-            <li key={r.tea_id}>
+            <li key={r.tasting_id}>
               <span className="pos">{i + 1}</span>
               <span className="grow">
-                <b>{r.name}</b>
+                <b className="with-icon">
+                  <TeaBadge tea={r} size={20} />
+                  {r.name}
+                </b>
                 <span className="muted small">
                   {r.rating_count} {r.rating_count === 1 ? 'rating' : 'ratings'}
                   {r.buy_again_yes > 0 && ` · ${r.buy_again_yes} would buy again`}
@@ -81,38 +92,65 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
         </ol>
       </section>
 
-      <section className="stack-sm">
-        <h3>Each taster</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Taster</th>
-                <th>Rated</th>
-                {SCORE_FIELDS.map((f) => (
-                  <th key={f}>{f}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.people.map((p) => (
-                <tr key={p.participant.id}>
-                  <td>{p.participant.display_name}</td>
-                  <td>{p.rated}</td>
-                  {SCORE_FIELDS.map((f) => (
-                    <td key={f}>{fmt(p.average_by_field[f])}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {data.anonymous ? (
+        <div className="notice small">
+          This room rates anonymously, so the per-person tables and “who agrees” are hidden.
         </div>
-        <p className="muted small">Average score each person gives. A low average means a strict taster.</p>
-      </section>
+      ) : (
+        <section className="stack-sm">
+          <Heading kind="person" level={3}>
+            Each taster
+          </Heading>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Taster</th>
+                  <th>Rated</th>
+                  {SCORE_FIELDS.map((f) => (
+                    <th key={f}>{f}</th>
+                  ))}
+                  <th aria-label="Notes" />
+                </tr>
+              </thead>
+              <tbody>
+                {data.people.map((p) => (
+                  <tr key={p.participant.id}>
+                    <td>
+                      <span className="with-icon">
+                        <ItemIcon name={p.participant.icon} colorFrom={p.participant.display_name} size={18} />
+                        {p.participant.display_name}
+                      </span>
+                    </td>
+                    <td>{p.rated}</td>
+                    {SCORE_FIELDS.map((f) => (
+                      <td key={f}>{fmt(p.average_by_field[f])}</td>
+                    ))}
+                    <td>
+                      {p.rated > 0 && (
+                        <Link
+                          to={`/r/${slug}/notes?who=${p.participant.id}&print=1`}
+                          className="table-link"
+                          aria-label={`Notes by ${p.participant.display_name} as PDF`}
+                        >
+                          PDF
+                        </Link>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="muted small">Average score each person gives. A low average means a strict taster.</p>
+        </section>
+      )}
 
       <section className="stack-sm">
         <div className="row-between">
-          <h3>Ingredients</h3>
+          <Heading kind="ingredient" level={3}>
+            Ingredients
+          </Heading>
           <label className="inline-select">
             <span className="muted small">In at least</span>
             <select value={minTeas} onChange={(e) => setMinTeas(Number(e.target.value))}>
@@ -125,8 +163,9 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
           </label>
         </div>
         <p className="muted small">
-          How teas with each ingredient scored compared with each person's usual Overall score. +1.5
-          means those teas got 1.5 points more than that person's average.
+          {data.anonymous
+            ? "How teas with each ingredient scored compared with each taster's usual Overall score, averaged over everyone."
+            : "How teas with each ingredient scored compared with each person's usual Overall score. +1.5 means those teas got 1.5 points more than that person's average."}
         </p>
         {ingredients.length === 0 ? (
           <div className="notice">No ingredient appears in {minTeas} rated teas yet.</div>
@@ -138,7 +177,13 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
                   <th>Ingredient</th>
                   <th>Teas</th>
                   {data.people.map((p) => (
-                    <th key={p.participant.id}>{p.participant.display_name}</th>
+                    <th key={p.participant.id}>
+                      <ItemIcon
+                        name={p.participant.icon}
+                        colorFrom={p.participant.display_name}
+                        label={p.participant.display_name}
+                      />
+                    </th>
                   ))}
                   <th>All</th>
                   <th className="wide" />
@@ -166,7 +211,9 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
 
       {data.agreement.some((a) => a.shared_teas > 0) && (
         <section className="stack-sm">
-          <h3>Who agrees</h3>
+          <Heading kind="heart" level={3}>
+            Who agrees
+          </Heading>
           <ul className="agreement">
             {data.agreement
               .filter((a) => a.shared_teas > 0)

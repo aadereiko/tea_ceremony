@@ -3,21 +3,22 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import { api, type Session } from '../lib/api'
-import { saveRoom } from '../lib/sessions'
+import { PERSON_ICONS } from '../lib/icons'
+import { rememberSession, savedProfile } from '../lib/sessions'
 import { Field } from './Field'
+import { IconPicker } from './IconPicker'
 
-export function JoinForm({ slug, onJoined }: { slug: string; onJoined: (s: Session) => void }) {
+type Props = { slug: string; signedOut?: boolean; onJoined: (s: Session) => void }
+
+export function JoinForm({ slug, signedOut = false, onJoined }: Props) {
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [profile] = useState(savedProfile)
+  const [name, setName] = useState(profile.name)
+  const [icon, setIcon] = useState<string | null>(profile.icon)
   const join = useMutation({
-    mutationFn: () => api.joinRoom(slug, { password, display_name: name }),
+    mutationFn: () => api.joinRoom(slug, { password, display_name: name, my_icon: icon }),
     onSuccess: (session) => {
-      saveRoom({
-        slug,
-        name: session.room.name,
-        token: session.token,
-        me: session.me.display_name,
-      })
+      rememberSession(session)
       onJoined(session)
     },
   })
@@ -30,6 +31,12 @@ export function JoinForm({ slug, onJoined }: { slug: string; onJoined: (s: Sessi
           Room code <b>{slug}</b>
         </p>
       </header>
+      {signedOut && (
+        <div className="notice small">
+          You're no longer signed in to this room. The host may have deleted it. If it still exists, join again
+          with its password.
+        </div>
+      )}
       <form
         className="panel"
         onSubmit={(e) => {
@@ -55,6 +62,7 @@ export function JoinForm({ slug, onJoined }: { slug: string; onJoined: (s: Sessi
           onChange={(e) => setName(e.target.value)}
           hint="Already in this room? Use the same name to continue as yourself."
         />
+        <IconPicker label="Your animal (optional)" icons={PERSON_ICONS} value={icon} onChange={setIcon} />
         {join.error && <p className="error">{join.error.message}</p>}
         <button className="primary" disabled={join.isPending}>
           {join.isPending ? 'Joining…' : 'Join'}

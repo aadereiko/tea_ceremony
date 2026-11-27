@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
-from app.routes import rooms, teas
+from app.routes import catalog, rooms, teas
 
 settings = get_settings()
 
@@ -19,6 +19,7 @@ app.add_middleware(
 )
 app.include_router(rooms.router)
 app.include_router(teas.router)
+app.include_router(catalog.router)
 
 
 @app.get("/api/health")

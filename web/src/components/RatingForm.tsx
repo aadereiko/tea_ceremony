@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { SCORE_FIELDS, type RatingInput, type ScoreField } from '../lib/api'
+import { type RatingInput, type ScoreField } from '../lib/api'
 
-const LABELS: Record<ScoreField, { label: string; hint?: string }> = {
-  smell: { label: 'Smell', hint: 'How much you like the aroma. 0 is unpleasant, 10 is lovely.' },
-  taste: { label: 'Taste', hint: 'How much you enjoy the flavour while sipping.' },
-  finish: { label: 'Finish', hint: 'How pleasant the aftertaste is a few seconds after you swallow.' },
-  overall: { label: 'Overall' },
-}
+const QUESTIONS: { field: ScoreField; label: string }[] = [
+  { field: 'smell', label: 'Smell' },
+  { field: 'taste', label: 'Taste' },
+  { field: 'finish', label: 'Finish (aftertaste)' },
+  { field: 'overall', label: 'Overall' },
+]
 
 const EMPTY: RatingInput = {
   smell: null,
@@ -18,50 +18,91 @@ const EMPTY: RatingInput = {
   note: '',
 }
 
+const SAVE_DELAY_MS = 400
+
 type Props = {
   initial: RatingInput | null
-  pending: boolean
+  saving: boolean
   error: string | null
-  onSubmit: (rating: RatingInput) => void
+  onSave: (rating: RatingInput) => void
 }
 
-export function RatingForm({ initial, pending, error, onSubmit }: Props) {
+function cleaned(draft: RatingInput): RatingInput {
+  return { ...draft, note: draft.note.trim() }
+}
+
+function isEmpty(rating: RatingInput): boolean {
+  return Object.values(rating).every((v) => v === null || v === '')
+}
+
+function Scale({ label, value, onPick }: { label: string; value: number | null; onPick: (v: number) => void }) {
+  return (
+    <div className="dots" role="group" aria-label={label}>
+      {Array.from({ length: 11 }, (_, v) => (
+        <button
+          type="button"
+          key={v}
+          className={`dot${value === v ? ' on' : ''}`}
+          aria-pressed={value === v}
+          aria-label={`${label} ${v}`}
+          onClick={() => onPick(v)}
+        >
+          {v}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function RatingForm({ initial, saving, error, onSave }: Props) {
   const [draft, setDraft] = useState<RatingInput>(initial ?? EMPTY)
-  const hasScore = SCORE_FIELDS.some((f) => draft[f] !== null)
+  const [savedOnce, setSavedOnce] = useState(false)
+  const lastSaved = useRef(JSON.stringify(cleaned(initial ?? EMPTY)))
+  const pending = useRef<RatingInput | null>(null)
+  const onSaveRef = useRef(onSave)
+  onSaveRef.current = onSave
+
+  const flush = () => {
+    if (!pending.current) return
+    const rating = pending.current
+    pending.current = null
+    lastSaved.current = JSON.stringify(rating)
+    onSaveRef.current(rating)
+    setSavedOnce(true)
+  }
+
+  useEffect(() => {
+    const rating = cleaned(draft)
+    if (JSON.stringify(rating) === lastSaved.current || isEmpty(rating)) return
+    pending.current = rating
+    const timer = setTimeout(flush, SAVE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [draft])
+
+  // Closing the sheet unmounts this form; save a change that was still waiting for its timer.
+  useEffect(() => flush, [])
+
   const toggle = <K extends keyof RatingInput>(key: K, value: RatingInput[K]) =>
     setDraft((d) => ({ ...d, [key]: d[key] === value ? null : value }))
 
   return (
-    <form
-      className="stack"
-      onSubmit={(e) => {
-        e.preventDefault()
-        onSubmit({ ...draft, note: draft.note.trim() })
-      }}
-    >
-      {SCORE_FIELDS.map((field) => (
-        <fieldset key={field} className="crit">
-          <legend className="label">{LABELS[field].label}</legend>
-          {LABELS[field].hint && <small className="muted">{LABELS[field].hint}</small>}
-          <div className="dots">
-            {Array.from({ length: 11 }, (_, v) => (
-              <button
-                type="button"
-                key={v}
-                className={`dot${draft[field] === v ? ' on' : ''}`}
-                aria-pressed={draft[field] === v}
-                aria-label={`${LABELS[field].label} ${v}`}
-                onClick={() => toggle(field, v)}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+    <div className="stack rating-form">
+      <div className="row-between">
+        <span className="label">Your rating</span>
+        <span className="muted small" aria-live="polite">
+          {saving ? 'Saving…' : error ? '' : savedOnce ? 'Saved' : ''}
+        </span>
+      </div>
+
+      {QUESTIONS.map(({ field, label }) => (
+        <div className="crit" key={field}>
+          <span className="label">{label}</span>
+          <Scale label={label} value={draft[field]} onPick={(v) => toggle(field, v)} />
+        </div>
       ))}
-      <fieldset className="crit">
-        <legend className="label">Would buy again</legend>
-        <small className="muted">Would you buy a pack of this tea for yourself?</small>
+
+      <div className="crit">
+        <span className="label">Would you buy it again?</span>
         <div className="segs">
           {[false, true].map((value) => (
             <button
@@ -75,21 +116,19 @@ export function RatingForm({ initial, pending, error, onSubmit }: Props) {
             </button>
           ))}
         </div>
-      </fieldset>
+      </div>
+
       <textarea
-        aria-label="Note"
+        aria-label="Your note"
         rows={2}
         maxLength={2000}
-        placeholder="Notes: what does it remind you of?"
+        placeholder="A note: what does it remind you of?"
         value={draft.note}
         onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+        onBlur={flush}
       />
+
       {error && <p className="error">{error}</p>}
-      <div className="actions">
-        <button className="primary" disabled={pending || !hasScore}>
-          {pending ? 'Saving…' : initial ? 'Update my rating' : 'Save my rating'}
-        </button>
-      </div>
-    </form>
+    </div>
   )
 }

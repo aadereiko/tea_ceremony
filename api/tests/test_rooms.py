@@ -57,3 +57,31 @@ def test_normalize_name_ignores_case_and_spacing():
     assert normalize_name("  Michał   Kowalski ") == normalize_name("michał kowalski")
     assert normalize_name("Straße") == normalize_name("STRASSE")
     assert normalize_name("Ａnna") == normalize_name("anna")
+
+
+async def test_creator_is_owner_and_joiners_are_not(client):
+    created = await make_room(client)
+    assert created["me"]["is_owner"] is True
+    joined = (await join(client, created["room"]["slug"], "Michutek")).json()
+    assert joined["me"]["is_owner"] is False
+
+
+async def test_only_owner_can_delete_room(client):
+    created = await make_room(client)
+    slug = created["room"]["slug"]
+    guest = (await join(client, slug, "Michutek")).json()
+    await client.post(
+        f"/api/rooms/{slug}/teas",
+        json={"new_tea": {"name": "Sencha"}},
+        headers=auth(created["token"]),
+    )
+
+    res = await client.delete(f"/api/rooms/{slug}", headers=auth(guest["token"]))
+    assert res.status_code == 403
+
+    res = await client.delete(f"/api/rooms/{slug}", headers=auth(created["token"]))
+    assert res.status_code == 204
+    assert (
+        await client.get(f"/api/rooms/{slug}", headers=auth(created["token"]))
+    ).status_code == 401
+    assert (await join(client, slug, "Sashka")).status_code == 401
