@@ -5,6 +5,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -81,6 +82,9 @@ class Tea(Base):
     notes: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    shops: Mapped[list["Shop"]] = relationship(
+        secondary="tea_shops", back_populates="teas", order_by="Shop.name_key"
+    )
     ingredient_links: Mapped[list["TeaIngredient"]] = relationship(
         back_populates="tea", cascade="all, delete-orphan", order_by="TeaIngredient.position"
     )
@@ -92,6 +96,9 @@ class Ingredient(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(60))
     name_key: Mapped[str] = mapped_column(String(60), unique=True)
+    image_url: Mapped[str | None] = mapped_column(String(500))
+    image_credit: Mapped[str | None] = mapped_column(String(300))
+    image_source: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -164,6 +171,90 @@ class Rating(Base):
 
     tasting: Mapped[Tasting] = relationship(back_populates="ratings")
     participant: Mapped[Participant] = relationship()
+
+
+class Shop(Base):
+    __tablename__ = "shops"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(120))
+    name_key: Mapped[str] = mapped_column(String(120))
+    country: Mapped[str] = mapped_column(String(2), index=True)
+    city: Mapped[str] = mapped_column(String(80))
+    city_key: Mapped[str] = mapped_column(String(80))
+    address: Mapped[str] = mapped_column(String(200), default="")
+    website: Mapped[str] = mapped_column(String(300), default="")
+    latitude: Mapped[float | None] = mapped_column(Float)
+    longitude: Mapped[float | None] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    scores: Mapped[list["ShopScore"]] = relationship(
+        back_populates="shop", cascade="all, delete-orphan", passive_deletes=True
+    )
+    teas: Mapped[list[Tea]] = relationship(
+        secondary="tea_shops", back_populates="shops", order_by=Tea.name_key
+    )
+    comments: Mapped[list["ShopComment"]] = relationship(
+        back_populates="shop",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="ShopComment.created_at",
+    )
+
+
+class TeaShop(Base):
+    __tablename__ = "tea_shops"
+
+    tea_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("teas.id", ondelete="CASCADE"), primary_key=True
+    )
+    shop_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("shops.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+
+
+# Shop scores and comments outlive the room their author joined from: deleting a room only
+# unlinks them (author_id becomes NULL) and the saved name and icon keep showing who wrote them.
+class ShopScore(Base):
+    __tablename__ = "shop_scores"
+    __table_args__ = (
+        UniqueConstraint("shop_id", "author_id"),
+        CheckConstraint("score >= 0 AND score <= 10", name="ck_shop_scores_score"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    shop_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("shops.id", ondelete="CASCADE"), index=True
+    )
+    author_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("participants.id", ondelete="SET NULL"), index=True
+    )
+    author_name: Mapped[str] = mapped_column(String(40))
+    author_icon: Mapped[str] = mapped_column(String(16))
+    score: Mapped[int] = mapped_column(Integer)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    shop: Mapped[Shop] = relationship(back_populates="scores")
+
+
+class ShopComment(Base):
+    __tablename__ = "shop_comments"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    shop_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("shops.id", ondelete="CASCADE"), index=True
+    )
+    author_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("participants.id", ondelete="SET NULL"), index=True
+    )
+    author_name: Mapped[str] = mapped_column(String(40))
+    author_icon: Mapped[str] = mapped_column(String(16))
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    shop: Mapped[Shop] = relationship(back_populates="comments")
 
 
 def is_hidden(tasting: Tasting, room: Room) -> bool:

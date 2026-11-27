@@ -289,9 +289,13 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
                   .join(' · ')
                 const score =
                   tasting.average_overall != null ? (
-                    <span className="score-pill">{fmt(tasting.average_overall)}</span>
+                    <span className="score-pill tip tip-end" data-tip="Average Overall score from everyone">
+                      {fmt(tasting.average_overall)}
+                    </span>
                   ) : tasting.my_rating ? (
-                    <span className="score-pill">✓</span>
+                    <span className="score-pill tip tip-end" data-tip="You rated this. Scores show once revealed.">
+                      ✓
+                    </span>
                   ) : null
                 return (
                   <li key={tasting.id}>

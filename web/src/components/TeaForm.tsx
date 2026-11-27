@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { IngredientRef, TeaInput } from '../lib/api'
+import type { IngredientRef, ShopRef, TeaInput } from '../lib/api'
+import { flag } from '../lib/countries'
 import { TEA_COLORS, TEA_ICONS, teaColor } from '../lib/icons'
 import { IconPicker } from './IconPicker'
 import { IngredientCombobox } from './IngredientCombobox'
@@ -8,25 +9,27 @@ import { IngredientCombobox } from './IngredientCombobox'
 type Props = {
   initial?: TeaInput
   known: IngredientRef[]
+  shops: ShopRef[]
   submitLabel: string
   pending: boolean
   error: string | null
   onSubmit: (tea: TeaInput) => void
 }
 
-export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit }: Props) {
+export function TeaForm({ initial, known, shops, submitLabel, pending, error, onSubmit }: Props) {
   const [name, setName] = useState(initial?.name ?? '')
   const [ingredients, setIngredients] = useState(initial?.ingredients ?? [])
   const [icon, setIcon] = useState(initial?.icon ?? null)
   const [color, setColor] = useState(initial?.color ?? null)
   const [notes, setNotes] = useState(initial?.notes ?? '')
+  const [shopIds, setShopIds] = useState(initial?.shop_ids ?? [])
   // An error belongs to the values that caused it; hide it once the user changes anything.
   const [edited, setEdited] = useState(false)
   const mounted = useRef(false)
   useEffect(() => {
     if (mounted.current) setEdited(true)
     mounted.current = true
-  }, [name, ingredients, icon, color, notes])
+  }, [name, ingredients, icon, color, notes, shopIds])
 
   return (
     <form
@@ -34,7 +37,7 @@ export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit 
       onSubmit={(e) => {
         e.preventDefault()
         setEdited(false)
-        onSubmit({ name, ingredients, icon, color, notes })
+        onSubmit({ name, ingredients, icon, color, notes, shop_ids: shopIds })
       }}
     >
       <label className="field" htmlFor="tea-name">
@@ -93,6 +96,47 @@ export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit 
         />
         <small className="muted">Shown even while the tea is a mystery, so keep its name and ingredients out.</small>
       </label>
+      <div className="field">
+        <label className="label" htmlFor="tea-shops">
+          Where to buy
+        </label>
+        {shopIds.length > 0 && (
+          <div className="chips">
+            {shopIds.map((id) => {
+              const shop = shops.find((s) => s.id === id)
+              return (
+                <span className="chip" key={id}>
+                  {shop ? `${flag(shop.country)} ${shop.name}, ${shop.city}` : 'Loading…'}
+                  <button
+                    type="button"
+                    className="chip-x"
+                    aria-label={`Remove ${shop?.name ?? 'shop'}`}
+                    onClick={() => setShopIds(shopIds.filter((x) => x !== id))}
+                  >
+                    ✕
+                  </button>
+                </span>
+              )
+            })}
+          </div>
+        )}
+        <select
+          id="tea-shops"
+          value=""
+          onChange={(e) => e.target.value && setShopIds([...shopIds, e.target.value])}
+          disabled={shops.length === shopIds.length}
+        >
+          <option value="">{shops.length === 0 ? 'No shops yet' : 'Add a shop…'}</option>
+          {shops
+            .filter((s) => !shopIds.includes(s.id))
+            .map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}, {s.city}
+              </option>
+            ))}
+        </select>
+        <small className="muted">Missing a shop? Add it in Tea shops first.</small>
+      </div>
       {error && !edited && <p className="error">{error}</p>}
       <button className="primary" disabled={pending}>
         {pending ? 'Saving…' : submitLabel}

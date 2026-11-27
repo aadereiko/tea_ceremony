@@ -19,7 +19,7 @@ export type RatingInput = Record<ScoreField, number | null> & {
 }
 export type Rating = RatingInput & { participant: Participant | null; is_mine: boolean; updated_at: string | null }
 
-export type IngredientRef = { id: string; name: string }
+export type IngredientRef = { id: string; name: string; image_url: string | null; image_credit: string | null; image_source: string | null }
 export type Ingredient = IngredientRef & { tea_count: number }
 
 export type CatalogTea = {
@@ -29,14 +29,18 @@ export type CatalogTea = {
   color: string | null
   notes: string
   ingredients: IngredientRef[]
+  shops: ShopRef[]
   room_count: number
 }
+export type ShopRef = { id: string; name: string; city: string; country: string }
+export type TeaRef = { id: string; name: string; icon: string; color: string | null }
 export type TeaInput = {
   name: string
   ingredients: string[]
   icon: string | null
   color: string | null
   notes: string
+  shop_ids: string[]
 }
 
 export type Tasting = {
@@ -54,11 +58,38 @@ export type Tasting = {
   ratings: Rating[] | null
 }
 
+export type ShopInput = {
+  name: string
+  country: string
+  city: string
+  address: string
+  website: string
+  latitude: number | null
+  longitude: number | null
+}
+export type ShopAuthor = { name: string; icon: string; is_me: boolean }
+export type ShopSummary = ShopInput & {
+  id: string
+  score_count: number
+  average_score: number | null
+  my_score: number | null
+  comment_count: number
+}
+export type Shop = ShopSummary & {
+  teas: TeaRef[]
+  scores: { author: ShopAuthor; score: number; updated_at: string }[]
+  comments: { id: string; author: ShopAuthor; text: string; created_at: string }[]
+}
+
 export type Analytics = {
   anonymous: boolean
   taster_count: number
   tea_count: number
   rating_count: number
+  room_average: number | null
+  prior_votes: number
+  drivers: { participant: Participant | null; teas: number; correlation: Record<'smell' | 'taste' | 'finish', number | null> }[]
+  min_driver_teas: number
   ranking: {
     tasting_id: string
     hidden: boolean
@@ -67,6 +98,8 @@ export type Analytics = {
     name: string
     rating_count: number
     average_overall: number | null
+    fair_score: number | null
+    spread: number | null
     average_by_field: Record<ScoreField, number | null>
     buy_again_yes: number
   }[]
@@ -180,6 +213,21 @@ export const api = {
     request<void>(`/api/catalog/ingredients/${id}`, { method: 'DELETE', token }),
   analytics: (slug: string, token: string) =>
     request<Analytics>(`/api/rooms/${slug}/analytics`, { token }),
+  shops: (token: string) => request<ShopSummary[]>('/api/shops', { token }),
+  shop: (token: string, id: string) => request<Shop>(`/api/shops/${id}`, { token }),
+  addShop: (token: string, body: ShopInput) =>
+    request<Shop>('/api/shops', { method: 'POST', token, body: JSON.stringify(body) }),
+  editShop: (token: string, id: string, body: ShopInput) =>
+    request<Shop>(`/api/shops/${id}`, { method: 'PATCH', token, body: JSON.stringify(body) }),
+  deleteShop: (token: string, id: string) => request<void>(`/api/shops/${id}`, { method: 'DELETE', token }),
+  scoreShop: (token: string, id: string, score: number | null) =>
+    score === null
+      ? request<Shop>(`/api/shops/${id}/score`, { method: 'DELETE', token })
+      : request<Shop>(`/api/shops/${id}/score`, { method: 'PUT', token, body: JSON.stringify({ score }) }),
+  commentOnShop: (token: string, id: string, text: string) =>
+    request<Shop>(`/api/shops/${id}/comments`, { method: 'POST', token, body: JSON.stringify({ text }) }),
+  deleteShopComment: (token: string, id: string, commentId: string) =>
+    request<Shop>(`/api/shops/${id}/comments/${commentId}`, { method: 'DELETE', token }),
 }
 
 export function teaInput(tea: CatalogTea): TeaInput {
@@ -189,6 +237,7 @@ export function teaInput(tea: CatalogTea): TeaInput {
     icon: tea.icon,
     color: tea.color,
     notes: tea.notes,
+    shop_ids: tea.shops.map((s) => s.id),
   }
 }
 

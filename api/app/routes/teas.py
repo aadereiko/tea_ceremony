@@ -28,7 +28,7 @@ def _tasting_query(room_id: uuid.UUID):
         .where(Tasting.room_id == room_id)
         .options(
             selectinload(Tasting.ratings).selectinload(Rating.participant),
-            selectinload(Tasting.tea).options(TEA_LOAD),
+            selectinload(Tasting.tea).options(*TEA_LOAD),
         )
         .order_by(Tasting.created_at)
     )

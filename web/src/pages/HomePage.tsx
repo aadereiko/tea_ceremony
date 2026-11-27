@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import { ItemIcon } from '../components/ItemIcon'
-import { Heading, KindIcon } from '../components/KindIcon'
+import { Heading } from '../components/KindIcon'
 import { Leaf } from '../components/Leaf'
 import { LikedTeas } from '../components/LikedTeas'
 import { forgetRoom, savedRooms } from '../lib/sessions'
@@ -30,10 +30,6 @@ export function HomePage() {
           </Link>
           <Link to="/join" className="ghost big">
             Join a room
-          </Link>
-          <Link to="/catalog" className="ghost big with-icon">
-            <KindIcon kind="catalog" size={18} />
-            Tea catalog
           </Link>
         </div>
       </header>
@@ -83,7 +79,9 @@ export function HomePage() {
           you.
         </div>
       )}
-      <p className="app-version muted small">Tea Ceremony v{__APP_VERSION__}</p>
+      <p className="app-version muted small">
+        <Link to="/docs/start">How it works</Link> · Tea Ceremony v{__APP_VERSION__}
+      </p>
       {confirmDialog}
     </main>
   )

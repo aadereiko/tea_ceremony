@@ -7,7 +7,7 @@ import { Heading, KindIcon } from '../components/KindIcon'
 import { Sheet } from '../components/Sheet'
 import { TeaForm } from '../components/TeaForm'
 import { api, teaInput, type CatalogTea, type TeaInput } from '../lib/api'
-import { useCatalogTeas, useIngredients } from '../lib/queries'
+import { useCatalogTeas, useIngredients, useShops } from '../lib/queries'
 import { catalogToken } from '../lib/sessions'
 import { TeaBadge } from '../components/TeaBadge'
 import { useConfirm } from '../components/Confirm'
@@ -85,6 +85,7 @@ function CatalogTeas({ token, search }: { token: string; search: string }) {
   const queryClient = useQueryClient()
   const { data, error, isPending } = useCatalogTeas(token)
   const known = useIngredients(token).data ?? []
+  const shops = useShops(token).data ?? []
   const [openId, setOpenId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
 
@@ -154,8 +155,9 @@ function CatalogTeas({ token, search }: { token: string; search: string }) {
       <CatalogTeaSheet token={token} tea={open} known={known} onClose={() => setOpenId(null)} />
       <Sheet open={creating} onClose={() => setCreating(false)} eyebrow="Tea catalog" title="New tea">
         <TeaForm
-          initial={{ name: search.trim(), ingredients: [], icon: null, color: null, notes: '' }}
+          initial={{ name: search.trim(), ingredients: [], icon: null, color: null, notes: '', shop_ids: [] }}
           known={known}
+          shops={shops}
           submitLabel="Add to catalog"
           pending={create.isPending}
           error={create.error?.message ?? null}
@@ -174,6 +176,7 @@ type SheetProps = {
 }
 
 function CatalogTeaSheet({ token, tea, known, onClose }: SheetProps) {
+  const shops = useShops(token).data ?? []
   const queryClient = useQueryClient()
   const [confirmDialog, confirm] = useConfirm()
   const refresh = () => {
@@ -224,6 +227,7 @@ function CatalogTeaSheet({ token, tea, known, onClose }: SheetProps) {
             key={tea.id}
             initial={teaInput(tea)}
             known={known}
+            shops={shops}
             submitLabel="Save changes"
             pending={edit.isPending}
             error={edit.error?.message ?? null}

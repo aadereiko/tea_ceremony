@@ -1,7 +1,7 @@
 {
   "name": "tea-ceremony-web",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,12 +11,16 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@observablehq/plot": "^0.6.19",
     "@tanstack/react-query": "^5.102.5",
+    "leaflet": "^1.9.4",
+    "marked": "^18.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.3.0"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.23",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

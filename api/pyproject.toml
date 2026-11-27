@@ -1,6 +1,6 @@
 [project]
 name = "tea-ceremony-api"
-version = "0.2.0"
+version = "0.3.0"
 description = "Tea Ceremony API: rooms, teas, ratings and analytics"
 requires-python = ">=3.13"
 dependencies = [

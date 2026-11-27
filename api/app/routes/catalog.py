@@ -7,6 +7,7 @@ from app.catalog import TEA_LOAD, catalog_tea_out, create_tea, edit_tea, load_te
 from app.deps import AnyMember, Db
 from app.models import Ingredient, Tea, TeaIngredient
 from app.names import normalize_name
+from app.photos import apply_known_photo
 from app.schemas import (
     CatalogTeaOut,
     IngredientOut,
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/api/catalog", tags=["catalog"])
 
 @router.get("/teas")
 async def list_teas(_: AnyMember, db: Db) -> list[CatalogTeaOut]:
-    teas = (await db.scalars(select(Tea).options(TEA_LOAD).order_by(Tea.name_key))).all()
+    teas = (await db.scalars(select(Tea).options(*TEA_LOAD).order_by(Tea.name_key))).all()
     counts = await room_counts(db, [t.id for t in teas])
     return [catalog_tea_out(t, counts.get(t.id, 0)) for t in teas]
 
@@ -50,11 +51,22 @@ async def remove_tea(tea_id: uuid.UUID, _: AnyMember, db: Db) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+def _with_count(ingredient: Ingredient, tea_count: int) -> IngredientOut:
+    return IngredientOut(
+        id=ingredient.id,
+        name=ingredient.name,
+        image_url=ingredient.image_url,
+        image_credit=ingredient.image_credit,
+        image_source=ingredient.image_source,
+        tea_count=tea_count,
+    )
+
+
 async def _ingredient_out(db: Db, ingredient: Ingredient) -> IngredientOut:
     count = await db.scalar(
         select(func.count()).where(TeaIngredient.ingredient_id == ingredient.id)
     )
-    return IngredientOut(id=ingredient.id, name=ingredient.name, tea_count=count or 0)
+    return _with_count(ingredient, count or 0)
 
 
 @router.get("/ingredients")
@@ -65,7 +77,7 @@ async def list_ingredients(_: AnyMember, db: Db) -> list[IngredientOut]:
         .group_by(Ingredient.id)
         .order_by(Ingredient.name_key)
     )
-    return [IngredientOut(id=i.id, name=i.name, tea_count=count) for i, count in rows]
+    return [_with_count(i, count) for i, count in rows]
 
 
 @router.patch("/ingredients/{ingredient_id}")
@@ -81,6 +93,7 @@ async def rename_ingredient(
     )
     if target is None:
         ingredient.name, ingredient.name_key = body.name, key
+        apply_known_photo(ingredient)
         await db.flush()
         return IngredientRenamed(ingredient=await _ingredient_out(db, ingredient), merged=False)
 
