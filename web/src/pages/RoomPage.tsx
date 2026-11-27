@@ -110,7 +110,8 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
     },
   })
   const changeSettings = useMutation({
-    mutationFn: (body: { blind?: boolean; anonymous?: boolean }) => api.updateRoom(slug, token, body),
+    mutationFn: (body: { blind?: boolean; anonymous?: boolean; hide_scores?: boolean }) =>
+      api.updateRoom(slug, token, body),
     onSuccess: () => {
       for (const key of ['room', 'teas', 'analytics']) queryClient.invalidateQueries({ queryKey: [key, slug] })
     },
@@ -371,6 +372,7 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
         tasting={openIndex >= 0 ? tastings[openIndex] : null}
         index={Math.max(openIndex, 0)}
         blind={info.blind}
+        hideScores={info.hide_scores}
         onClose={() => setOpenTeaId(null)}
       />
       <AddTeaSheet
@@ -402,7 +404,7 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
               <KindIcon kind="room" size={18} />
               <span>
                 Room settings
-                <small className="muted">Icon, blind tasting, anonymous ratings</small>
+                <small className="muted">Icon, blind tasting, anonymous ratings, hidden scores</small>
               </span>
             </button>
           )}
@@ -437,6 +439,14 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
               checked={info.anonymous}
               disabled={changeSettings.isPending}
               onChange={(anonymous) => changeSettings.mutate({ anonymous })}
+            />
+            <Toggle
+              id="room-hide-scores"
+              label="Hide scores until revealed"
+              hint="Scores stay hidden until someone reveals them for each tea. Turning it off shows every score."
+              checked={info.hide_scores}
+              disabled={changeSettings.isPending}
+              onChange={(hide_scores) => changeSettings.mutate({ hide_scores })}
             />
           </>
         )}

@@ -35,6 +35,7 @@ def room_out(room: Room) -> RoomOut:
         icon=room.icon,
         blind=room.blind,
         anonymous=room.anonymous,
+        hide_scores=room.hide_scores,
         participants=[ParticipantOut.model_validate(p) for p in room.participants],
     )
 
@@ -68,6 +69,7 @@ async def create_room(body: RoomCreate, db: Db) -> SessionOut:
         icon=body.icon or pick(ROOM_ICONS),
         blind=body.blind,
         anonymous=body.anonymous,
+        hide_scores=body.anonymous if body.hide_scores is None else body.hide_scores,
         password_hash=hash_password(body.password),
     )
     me = Participant(

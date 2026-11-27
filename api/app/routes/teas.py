@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.analytics import build_analytics
 from app.catalog import TEA_LOAD, catalog_tea_out, create_tea, load_tea, room_counts
 from app.deps import CurrentMember, Db, Member
-from app.models import Participant, Rating, Tasting, is_hidden
+from app.models import Participant, Rating, Tasting, is_hidden, scores_shown
 from app.schemas import (
     Analytics,
     ParticipantOut,
@@ -52,26 +52,20 @@ def tasting_out(tasting: Tasting, member: Member, counts: dict[uuid.UUID, int]) 
     # must not match the order people joined, or the rows could be matched back to names.
     ratings = sorted(tasting.ratings, key=lambda r: r.id) if room.anonymous else tasting.ratings
     hidden = is_hidden(tasting, room)
+    shown = scores_shown(tasting, room)
     return TastingOut(
         id=tasting.id,
         tea=None if hidden else catalog_tea_out(tasting.tea, counts.get(tasting.tea_id, 1)),
         tea_id=tasting.tea_id if not hidden or me.is_owner else None,
         hidden=hidden,
+        notes=tasting.tea.notes,
         added_by=ParticipantOut.model_validate(adder) if adder else None,
         created_at=tasting.created_at,
         rating_count=len(tasting.ratings),
-        average_overall=(
-            round(sum(overalls) / len(overalls), 2)
-            if tasting.scores_revealed and overalls
-            else None
-        ),
+        average_overall=round(sum(overalls) / len(overalls), 2) if shown and overalls else None,
         my_rating=RatingIn.model_validate(mine, from_attributes=True) if mine else None,
-        scores_revealed=tasting.scores_revealed,
-        ratings=(
-            [_rating_out(r, me, room.anonymous) for r in ratings]
-            if tasting.scores_revealed
-            else None
-        ),
+        scores_revealed=shown,
+        ratings=[_rating_out(r, me, room.anonymous) for r in ratings] if shown else None,
     )
 
 

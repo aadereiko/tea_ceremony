@@ -2,7 +2,7 @@ from collections import defaultdict
 from itertools import combinations
 from statistics import mean
 
-from app.models import SCORE_FIELDS, Rating, Room, Tasting, is_hidden
+from app.models import SCORE_FIELDS, Rating, Room, Tasting, is_hidden, scores_shown
 from app.schemas import (
     Agreement,
     Analytics,
@@ -21,7 +21,7 @@ def _avg(values: list[int | float | None]) -> float | None:
 def build_analytics(all_teas: list[Tasting], room: Room) -> Analytics:
     people = list(room.participants)
     # Scores nobody has revealed must not leak through averages, so they are left out entirely.
-    teas = [t for t in all_teas if t.scores_revealed]
+    teas = [t for t in all_teas if scores_shown(t, room)]
     position = {t.id: n for n, t in enumerate(all_teas, start=1)}
     ratings: list[Rating] = [r for t in teas for r in t.ratings]
     by_person: dict[str, list[Rating]] = defaultdict(list)

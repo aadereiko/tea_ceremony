@@ -13,6 +13,7 @@ from sqlalchemy import (
     Uuid,
     false,
     func,
+    true,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -32,6 +33,7 @@ class Room(Base):
     icon: Mapped[str] = mapped_column(String(16))
     blind: Mapped[bool] = mapped_column(Boolean, default=True, server_default=false())
     anonymous: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    hide_scores: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
     password_hash: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -166,3 +168,7 @@ class Rating(Base):
 
 def is_hidden(tasting: Tasting, room: Room) -> bool:
     return room.blind and not tasting.revealed
+
+
+def scores_shown(tasting: Tasting, room: Room) -> bool:
+    return tasting.scores_revealed or not room.hide_scores

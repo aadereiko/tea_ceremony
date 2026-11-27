@@ -91,6 +91,7 @@ export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit 
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Brew at 80 °C for 4 minutes"
         />
+        <small className="muted">Shown even while the tea is a mystery, so keep its name and ingredients out.</small>
       </label>
       {error && !edited && <p className="error">{error}</p>}
       <button className="primary" disabled={pending}>

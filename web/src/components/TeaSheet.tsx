@@ -19,10 +19,11 @@ type Props = {
   tasting: Tasting | null
   index: number
   blind: boolean
+  hideScores: boolean
   onClose: () => void
 }
 
-export function TeaSheet({ slug, token, me, tasting, index, blind, onClose }: Props) {
+export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, onClose }: Props) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [confirmDialog, confirm] = useConfirm()
@@ -113,9 +114,9 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, onClose }: Pr
       )}
       {tasting && !editing && (
         <>
-          {tea && (tea.ingredients.length > 0 || tea.notes) && (
+          {((tea && tea.ingredients.length > 0) || tasting.notes) && (
             <div className="info">
-              {tea.ingredients.length > 0 && (
+              {tea && tea.ingredients.length > 0 && (
                 <div className="chips">
                   {tea.ingredients.map((i) => (
                     <span className="chip" key={i.id}>
@@ -124,7 +125,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, onClose }: Pr
                   ))}
                 </div>
               )}
-              {tea.notes && <p className="muted pre">{tea.notes}</p>}
+              {tasting.notes && <p className="muted pre">{tasting.notes}</p>}
             </div>
           )}
           <RatingForm
@@ -169,7 +170,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, onClose }: Pr
                       {tasting.hidden ? 'Reveal tea' : 'Hide tea'}
                     </button>
                   )}
-                  {tasting.rating_count > 0 && (
+                  {hideScores && tasting.rating_count > 0 && (
                     <button
                       className="ghost small with-icon tip tip-end"
                       data-tip={

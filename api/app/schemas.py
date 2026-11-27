@@ -47,6 +47,7 @@ class RoomOut(BaseModel):
     icon: str
     blind: bool
     anonymous: bool
+    hide_scores: bool
     participants: list[ParticipantOut]
 
 
@@ -58,6 +59,8 @@ class RoomCreate(BaseModel):
     my_icon: PersonIcon | None = None
     blind: bool = True
     anonymous: bool = False
+    # Left out, it follows `anonymous`: an anonymous room hides scores unless asked not to.
+    hide_scores: bool | None = None
 
 
 class RoomJoin(BaseModel):
@@ -70,6 +73,7 @@ class RoomUpdate(BaseModel):
     icon: RoomIcon | None = None
     blind: bool | None = None
     anonymous: bool | None = None
+    hide_scores: bool | None = None
 
 
 class MeUpdate(BaseModel):
@@ -175,6 +179,8 @@ class TastingOut(BaseModel):
     # Only the host gets this for a hidden tea, so "Add tea" can skip teas already in the room.
     tea_id: uuid.UUID | None
     hidden: bool
+    # Sent even for a mystery tea: it usually holds the brewing steps, which tasters need.
+    notes: str
     added_by: ParticipantOut | None
     created_at: datetime
     rating_count: int

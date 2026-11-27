@@ -1,8 +1,8 @@
 from tests.conftest import auth, join, make_room
 
 
-async def setup_two(client):
-    created = await make_room(client)
+async def setup_two(client, **settings):
+    created = await make_room(client, **settings)
     slug = created["room"]["slug"]
     other = (await join(client, slug, "Michutek")).json()
     return slug, created["token"], other["token"]
@@ -82,7 +82,7 @@ async def test_new_tea_with_taken_name_is_rejected(client):
 
 
 async def test_scores_hidden_until_anyone_reveals_them(client):
-    slug, me, other = await setup_two(client)
+    slug, me, other = await setup_two(client, hide_scores=True)
     tasting = await add_new_tea(client, slug, me, "Gingerbread")
     await rate(client, slug, other, tasting["id"], 8, note="lovely")
     after = await rate(client, slug, me, tasting["id"], 6, smell=7, buy_again=True)
@@ -107,6 +107,45 @@ async def test_scores_hidden_until_anyone_reveals_them(client):
         headers=auth(me),
     )
     assert res.json()["ratings"] is None and res.json()["average_overall"] is None
+
+
+async def test_scores_show_at_once_when_room_does_not_hide_them(client):
+    slug, me, other = await setup_two(client)
+    tasting = await add_new_tea(client, slug, me, "Sencha")
+    await rate(client, slug, other, tasting["id"], 8)
+    after = await rate(client, slug, me, tasting["id"], 6)
+
+    assert after["scores_revealed"] is True and after["average_overall"] == 7
+    assert len(after["ratings"]) == 2
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert data["rating_count"] == 2
+
+
+async def test_anonymous_room_hides_scores_unless_told_not_to(client):
+    hidden = await make_room(client, anonymous=True)
+    shown = await make_room(client, anonymous=True, hide_scores=False)
+    named = await make_room(client)
+
+    assert hidden["room"]["hide_scores"] is True
+    assert shown["room"]["hide_scores"] is False
+    assert named["room"]["hide_scores"] is False
+
+
+async def test_turning_hiding_back_on_keeps_revealed_teas_revealed(client):
+    slug, host, guest = await setup_two(client, hide_scores=True)
+    kept = await add_new_tea(client, slug, host, "Kept")
+    other = await add_new_tea(client, slug, host, "Other")
+    await rate(client, slug, guest, kept["id"], 5)
+    await rate(client, slug, guest, other["id"], 7)
+    await reveal_scores(client, slug, guest, kept["id"])
+
+    await client.patch(f"/api/rooms/{slug}", json={"hide_scores": False}, headers=auth(host))
+    teas = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(guest))).json()
+    assert [t["scores_revealed"] for t in teas] == [True, True]
+
+    await client.patch(f"/api/rooms/{slug}", json={"hide_scores": True}, headers=auth(host))
+    teas = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(guest))).json()
+    assert [t["scores_revealed"] for t in teas] == [True, False]
 
 
 async def test_rating_is_updated_not_duplicated(client):
@@ -144,7 +183,7 @@ async def test_only_host_adds_and_removes_teas(client):
 
 
 async def test_analytics_compares_with_own_average(client):
-    slug, me, other = await setup_two(client)
+    slug, me, other = await setup_two(client, hide_scores=True)
     a = await add_new_tea(client, slug, me, "Citrus one", ["Lemon", "green tea"])
     b = await add_new_tea(client, slug, me, "Spicy one", ["Ginger", "black tea"])
     await rate(client, slug, me, a["id"], 8)
@@ -177,11 +216,14 @@ async def test_blind_room_hides_tea_until_anyone_reveals(client):
     )
     slug, host = created.json()["room"]["slug"], created.json()["token"]
     guest = (await join(client, slug, "Guest")).json()["token"]
-    tasting = await add_new_tea(client, slug, host, "Secret Sencha", ["green tea"])
+    tasting = await add_new_tea(
+        client, slug, host, "Secret Sencha", ["green tea"], notes="80 °C, 3 min"
+    )
     assert tasting["hidden"] is True and tasting["tea"] is None
 
     seen = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(guest))).json()[0]
     assert seen["tea"] is None and seen["tea_id"] is None
+    assert seen["notes"] == "80 °C, 3 min"
     as_host = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(host))).json()[0]
     assert as_host["tea"] is None and as_host["tea_id"] == tasting["tea_id"]
     await rate(client, slug, guest, tasting["id"], 8)

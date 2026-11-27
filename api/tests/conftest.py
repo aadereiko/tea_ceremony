@@ -34,10 +34,18 @@ def auth(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
-async def make_room(client: AsyncClient, name: str = "Advent", who: str = "Sashka") -> dict:
+async def make_room(
+    client: AsyncClient, name: str = "Advent", who: str = "Sashka", **settings
+) -> dict:
     res = await client.post(
         "/api/rooms",
-        json={"name": name, "password": "tea-time", "display_name": who, "blind": False},
+        json={
+            "name": name,
+            "password": "tea-time",
+            "display_name": who,
+            "blind": False,
+            **settings,
+        },
     )
     assert res.status_code == 201, res.text
     return res.json()
