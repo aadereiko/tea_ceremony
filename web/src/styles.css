@@ -531,6 +531,7 @@ th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: cap
   /* Spelled out: --shadow on :root was built from the dark --line, and a var() inside a custom
      property is resolved where it's declared, so it wouldn't pick up the light --line above. */
   --shadow: 0 0 0 1px #e4e4e1;
+  --tip-bg: #ffffff;
   color-scheme: light;
   background: var(--surface);
   color: var(--ink);
