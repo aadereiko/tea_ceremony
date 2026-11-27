@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { api, type TeaInput } from '../lib/api'
-import { useCatalogTeas, useIngredients } from '../lib/queries'
+import { useCatalogTeas, useIngredients, useShops } from '../lib/queries'
 import { KindIcon } from './KindIcon'
 import { Sheet } from './Sheet'
 import { TeaForm } from './TeaForm'
@@ -23,6 +23,7 @@ export function AddTeaSheet({ open, slug, token, roomName, inRoom, onClose }: Pr
   const [creating, setCreating] = useState(false)
   const catalog = useCatalogTeas(token)
   const known = useIngredients(token).data ?? []
+  const shops = useShops(token).data ?? []
 
   const add = useMutation({
     mutationFn: (body: { tea_id: string } | { new_tea: TeaInput }) => api.addTasting(slug, token, body),
@@ -56,8 +57,9 @@ export function AddTeaSheet({ open, slug, token, roomName, inRoom, onClose }: Pr
         <>
           <TeaForm
             key="new"
-            initial={{ name: newName, ingredients: [], icon: null, color: null, notes: '' }}
+            initial={{ name: newName, ingredients: [], icon: null, color: null, notes: '', shop_ids: [] }}
             known={known}
+            shops={shops}
             submitLabel="Add to catalog and room"
             pending={add.isPending}
             error={add.error?.message ?? null}

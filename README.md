@@ -38,9 +38,23 @@ likes in the Analytics tab.
   from a fixed list of real tea colours (`web/src/lib/icons.ts`).
 - **Ratings:** Smell, Taste, Finish, Overall (0 to 10), Would buy again, and a note. Each
   change saves on its own. Everyone's scores for a tea stay hidden until someone reveals them.
-- **Analytics:** ranking by average Overall, each taster's averages, ingredient preferences
+- **Analytics:** ranking by a fair score (a Bayesian average: every tea counts as if it had 2
+  extra votes at the room's average, so one lucky 10 doesn't top the list), each taster's averages, ingredient preferences
   (each tea's score compared with that person's own average, so a generous scorer doesn't skew
   it), and how closely each pair of tasters agrees.
+
+- **Tea shops** (`/shops`) are shared by everyone, like the catalog: name, country (ISO code),
+  city, address, website and a map location. Each person scores a shop once (0 to 10) and can
+  comment. Catalog teas link to the shops that sell them (many to many, `tea_shops`). Scores and comments keep their author's name, so they survive the author's room being
+  deleted. Maps use Leaflet with OpenStreetMap tiles, and "Find address" uses OpenStreetMap's
+  Nominatim search: both free, no key needed.
+- **Docs** for people using the app are Markdown files in `web/src/docs/`, one per topic, shown at
+  `/docs/<file name>`. Edit a file to change its page. To add a page, add a file and list it in
+  `PAGES` in `web/src/pages/DocsPage.tsx` (title, icon and menu group).
+- **Ingredient photos** are small WebP files in `web/public/ingredients/`, listed with their
+  credits in `api/app/ingredient_photos.json`. An ingredient whose name matches gets the photo
+  (its `image_url`), including ones that existed before the photo was added: the API fills those
+  in when it starts.
 
 ## Run it locally
 

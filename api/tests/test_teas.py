@@ -282,3 +282,75 @@ async def test_only_host_changes_room_settings(client):
         f"/api/rooms/{slug}", json={"blind": False, "anonymous": True}, headers=auth(host)
     )
     assert res.json()["room"]["blind"] is False and res.json()["room"]["anonymous"] is True
+
+
+async def test_ranking_trusts_a_tea_more_when_more_people_rated_it(client):
+    slug, me, other = await setup_two(client)
+    lucky = await add_new_tea(client, slug, me, "One fan")
+    liked = await add_new_tea(client, slug, me, "Both like it")
+    disliked = await add_new_tea(client, slug, me, "Nobody likes it")
+    await rate(client, slug, me, lucky["id"], 10)
+    for token in (me, other):
+        await rate(client, slug, token, liked["id"], 9)
+        await rate(client, slug, token, disliked["id"], 2)
+
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert data["room_average"] == 6.4 and data["prior_votes"] == 2
+    ranking = {r["name"]: r for r in data["ranking"]}
+    assert [r["name"] for r in data["ranking"]] == ["Both like it", "One fan", "Nobody likes it"]
+    assert ranking["One fan"]["average_overall"] == 10
+    assert ranking["One fan"]["fair_score"] == 7.6
+    assert ranking["Both like it"]["fair_score"] == 7.7
+
+
+async def test_taste_map_spread_is_how_far_apart_the_scores_are(client):
+    slug, me, other = await setup_two(client)
+    split = await add_new_tea(client, slug, me, "Splits the room")
+    solo = await add_new_tea(client, slug, me, "Only one score")
+    await rate(client, slug, me, split["id"], 9)
+    await rate(client, slug, other, split["id"], 2)
+    await rate(client, slug, me, solo["id"], 6)
+
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    spread = {r["name"]: r["spread"] for r in data["ranking"]}
+    assert spread == {"Splits the room": 7, "Only one score": None}
+
+
+async def rate_five(client, slug, token):
+    for n, overall in enumerate([2, 4, 6, 8, 10]):
+        tea = await add_new_tea(client, slug, token, f"Tea {n}")
+        await rate(
+            client, slug, token, tea["id"], overall, smell=overall, taste=10 - overall, finish=5
+        )
+
+
+async def test_drivers_show_which_score_moves_with_overall(client):
+    slug, me, _ = await setup_two(client)
+    await rate_five(client, slug, me)
+
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert data["min_driver_teas"] == 5
+    everyone = data["drivers"][0]
+    by_name = {d["participant"]["display_name"]: d for d in data["drivers"][1:]}
+    assert everyone["participant"] is None
+    assert by_name["Sashka"]["teas"] == 5
+    assert by_name["Sashka"]["correlation"] == {"smell": 1.0, "taste": -1.0, "finish": None}
+    assert by_name["Michutek"]["teas"] == 0
+    assert by_name["Michutek"]["correlation"]["smell"] is None
+
+
+async def test_drivers_need_enough_teas(client):
+    slug, me, _ = await setup_two(client)
+    for n in range(4):
+        tea = await add_new_tea(client, slug, me, f"Tea {n}")
+        await rate(client, slug, me, tea["id"], n * 2, smell=n * 2)
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert all(d["correlation"]["smell"] is None for d in data["drivers"])
+
+
+async def test_anonymous_room_only_shows_everyones_drivers(client):
+    slug, me, _ = await setup_two(client, anonymous=True, hide_scores=False)
+    await rate_five(client, slug, me)
+    data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(me))).json()
+    assert len(data["drivers"]) == 1 and data["drivers"][0]["participant"] is None
+    assert data["drivers"][0]["correlation"]["smell"] == 1.0

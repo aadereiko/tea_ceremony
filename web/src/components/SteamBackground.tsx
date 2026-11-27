@@ -40,6 +40,10 @@ export function SteamBackground() {
       cell = width < 560 ? 9 : 14
       canvas.width = width * ratio
       canvas.height = height * ratio
+      // Sized here, not with 100vh in CSS: on iPhones 100vh is taller than the visible area, so the
+      // drawing got stretched and the cup ended up below the screen, under the browser's toolbar.
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
     }
     const readInk = () => {
@@ -116,9 +120,11 @@ export function SteamBackground() {
       draw()
     }
     window.addEventListener('resize', onResize)
+    window.visualViewport?.addEventListener('resize', onResize)
     return () => {
       cancelAnimationFrame(frame)
       window.removeEventListener('resize', onResize)
+      window.visualViewport?.removeEventListener('resize', onResize)
     }
   }, [])
 

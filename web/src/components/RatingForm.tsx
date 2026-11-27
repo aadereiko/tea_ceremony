@@ -35,7 +35,7 @@ function isEmpty(rating: RatingInput): boolean {
   return Object.values(rating).every((v) => v === null || v === '')
 }
 
-function Scale({ label, value, onPick }: { label: string; value: number | null; onPick: (v: number) => void }) {
+export function Scale({ label, value, onPick }: { label: string; value: number | null; onPick: (v: number) => void }) {
   return (
     <div className="dots" role="group" aria-label={label}>
       {Array.from({ length: 11 }, (_, v) => (

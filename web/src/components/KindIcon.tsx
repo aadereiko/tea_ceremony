@@ -1,6 +1,8 @@
-export type Kind = 'room' | 'tea' | 'person' | 'ingredient' | 'catalog' | 'chart' | 'heart' | 'eye' | 'eye-off' | 'download' | 'more' | 'link' | 'plus' | 'trash' | 'leave' | 'check' | 'copy' | 'anonymous'
+export type Kind = 'help' | 'shop' | 'room' | 'tea' | 'person' | 'ingredient' | 'catalog' | 'chart' | 'heart' | 'eye' | 'eye-off' | 'download' | 'more' | 'link' | 'plus' | 'trash' | 'leave' | 'check' | 'copy' | 'anonymous'
 
 const PATHS: Record<Kind, string[]> = {
+  help: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6', 'M12 17h.01'],
+  shop: ['M4 10v10h16V10', 'M3 10l2-6h14l2 6z', 'M10 20v-5h4v5'],
   room: ['M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
   tea: ['M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z', 'M17 10.5h1.5a2.5 2.5 0 0 1 0 5H16.5', 'M8.5 3.5v2.5M12.5 3.5v2.5'],
   person: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4 21a8 8 0 0 1 16 0'],

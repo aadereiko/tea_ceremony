@@ -107,6 +107,9 @@ class TeaIn(BaseModel):
     icon: TeaIcon | None = None
     color: TeaColor | None = None
     notes: str = Field(default="", max_length=2000)
+    # Left out, the tea keeps the shops it has, so older clients that don't know about shops
+    # can't unlink them by saving.
+    shop_ids: list[uuid.UUID] | None = Field(default=None, max_length=50)
 
     @field_validator("name")
     @classmethod
@@ -127,6 +130,27 @@ class IngredientRef(BaseModel):
 
     id: uuid.UUID
     name: str
+    image_url: str | None = None
+    image_credit: str | None = None
+    image_source: str | None = None
+
+
+class ShopRef(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    city: str
+    country: str
+
+
+class TeaRef(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    icon: str
+    color: str | None
 
 
 class CatalogTeaOut(BaseModel):
@@ -136,6 +160,7 @@ class CatalogTeaOut(BaseModel):
     color: str | None
     notes: str
     ingredients: list[IngredientRef]
+    shops: list[ShopRef]
     room_count: int
 
 
@@ -220,6 +245,10 @@ class TeaRank(BaseModel):
     name: str
     rating_count: int
     average_overall: float | None
+    # The average pulled towards the room's average, more so for teas with few ratings.
+    fair_score: float | None
+    # Highest minus lowest Overall: how much the tasters disagreed. None with fewer than 2 scores.
+    spread: int | None
     average_by_field: dict[str, float | None]
     buy_again_yes: int
 
@@ -238,6 +267,14 @@ class IngredientPreference(BaseModel):
     relative_all: float | None
 
 
+class Driver(BaseModel):
+    # None is everyone's ratings pooled together.
+    participant: ParticipantOut | None
+    teas: int
+    # How closely each score moves with Overall, from -1 to 1. None until there are enough teas.
+    correlation: dict[str, float | None]
+
+
 class Agreement(BaseModel):
     a: ParticipantOut
     b: ParticipantOut
@@ -250,7 +287,109 @@ class Analytics(BaseModel):
     taster_count: int
     tea_count: int
     rating_count: int
+    room_average: float | None
+    prior_votes: int
     ranking: list[TeaRank]
     people: list[PersonSummary]
     ingredients: list[IngredientPreference]
     agreement: list[Agreement]
+    drivers: list[Driver]
+    min_driver_teas: int
+
+
+def _one_line(value: str) -> str:
+    return " ".join(value.split())
+
+
+class ShopIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    country: str = Field(pattern=r"^[A-Z]{2}$")
+    city: str = Field(min_length=1, max_length=80)
+    address: str = Field(default="", max_length=200)
+    website: str = Field(default="", max_length=300)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+
+    @field_validator("name", "city")
+    @classmethod
+    def not_blank(cls, value: str) -> str:
+        value = _one_line(value)
+        if not value:
+            raise ValueError("Can't be blank")
+        return value
+
+    @field_validator("address")
+    @classmethod
+    def clean_address(cls, value: str) -> str:
+        return _one_line(value)
+
+    @field_validator("website")
+    @classmethod
+    def web_link(cls, value: str) -> str:
+        value = value.strip()
+        # Shown as a link, so a "javascript:" address would run code for whoever clicks it.
+        if value and not value.lower().startswith(("http://", "https://")):
+            value = "https://" + value
+        return value
+
+    @model_validator(mode="after")
+    def both_coordinates(self) -> "ShopIn":
+        if (self.latitude is None) != (self.longitude is None):
+            raise ValueError("Give both latitude and longitude, or neither")
+        return self
+
+
+class ShopAuthor(BaseModel):
+    name: str
+    icon: str
+    is_me: bool
+
+
+class ShopScoreIn(BaseModel):
+    score: int = Field(ge=0, le=10)
+
+
+class ShopScoreOut(BaseModel):
+    author: ShopAuthor
+    score: int
+    updated_at: datetime
+
+
+class ShopCommentIn(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("text")
+    @classmethod
+    def not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Write something first")
+        return value
+
+
+class ShopCommentOut(BaseModel):
+    id: uuid.UUID
+    author: ShopAuthor
+    text: str
+    created_at: datetime
+
+
+class ShopSummary(BaseModel):
+    id: uuid.UUID
+    name: str
+    country: str
+    city: str
+    address: str
+    website: str
+    latitude: float | None
+    longitude: float | None
+    score_count: int
+    average_score: float | None
+    my_score: int | None
+    comment_count: int
+
+
+class ShopOut(ShopSummary):
+    teas: list[TeaRef]
+    scores: list[ShopScoreOut]
+    comments: list[ShopCommentOut]

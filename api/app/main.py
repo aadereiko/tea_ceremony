@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -6,11 +7,23 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import APP_VERSION, get_settings
-from app.routes import catalog, rooms, teas
+from app.db import SessionLocal
+from app.photos import fill_known_photos
+from app.routes import catalog, rooms, shops, teas
 
 settings = get_settings()
 
-app = FastAPI(title="Tea Ceremony API", version=APP_VERSION)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Ingredients created before their photo shipped get it here, so adding a photo needs no
+    # data migration: drop the file in, list it in ingredient_photos.json, deploy.
+    async with SessionLocal.begin() as db:
+        await fill_known_photos(db)
+    yield
+
+
+app = FastAPI(title="Tea Ceremony API", version=APP_VERSION, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -20,6 +33,7 @@ app.add_middleware(
 app.include_router(rooms.router)
 app.include_router(teas.router)
 app.include_router(catalog.router)
+app.include_router(shops.router)
 
 
 @app.get("/api/health")

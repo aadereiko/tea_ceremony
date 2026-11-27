@@ -10,6 +10,14 @@ export function useCatalogTeas(token: string | null) {
   })
 }
 
+export function useShops(token: string | null) {
+  return useQuery({
+    queryKey: ['shops'],
+    queryFn: () => api.shops(token!),
+    enabled: token !== null,
+  })
+}
+
 export function useIngredients(token: string | null) {
   return useQuery({
     queryKey: ['catalog', 'ingredients'],

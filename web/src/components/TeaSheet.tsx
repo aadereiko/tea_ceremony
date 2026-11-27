@@ -1,9 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router'
 
 import { api, SCORE_FIELDS, shownTea, teaInput, type Participant, type Rating, type RatingInput, type Tasting } from '../lib/api'
+import { flag } from '../lib/countries'
 import { fmt } from '../lib/format'
-import { useIngredients } from '../lib/queries'
+import { useIngredients, useShops } from '../lib/queries'
+import { Explain } from './Explain'
+import { IngredientPhoto } from './IngredientPhoto'
 import { KindIcon } from './KindIcon'
 import { RatingForm } from './RatingForm'
 import { Sheet } from './Sheet'
@@ -29,6 +33,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
   const [confirmDialog, confirm] = useConfirm()
   const [showNotes, setShowNotes] = useState(false)
   const known = useIngredients(token).data ?? []
+  const shops = useShops(token).data ?? []
   const refresh = () => {
     for (const key of [['teas', slug], ['analytics', slug], ['catalog']])
       queryClient.invalidateQueries({ queryKey: key })
@@ -105,6 +110,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
           <TeaForm
             initial={teaInput(tea)}
             known={known}
+            shops={shops}
             submitLabel="Save changes"
             pending={edit.isPending}
             error={edit.error?.message ?? null}
@@ -114,18 +120,30 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
       )}
       {tasting && !editing && (
         <>
-          {((tea && tea.ingredients.length > 0) || tasting.notes) && (
+          {tea && tea.ingredients.length > 0 && (
+            <div className="info chips" aria-label="Ingredients">
+              {tea.ingredients.map((i) => (
+                <span className="chip" key={i.id}>
+                  <IngredientPhoto ingredient={i} size={22} />
+                  {i.name}
+                </span>
+              ))}
+            </div>
+          )}
+          {tea && tea.shops.length > 0 && (
+            <div className="info chips" aria-label="Where to buy">
+              {tea.shops.map((shop) => (
+                <Link key={shop.id} to={`/shops/${shop.id}`} className="chip shop-chip">
+                  <KindIcon kind="shop" size={15} />
+                  {flag(shop.country)} {shop.name}
+                  <span className="muted">{shop.city}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+          {tasting.notes && (
             <div className="info">
-              {tea && tea.ingredients.length > 0 && (
-                <div className="chips">
-                  {tea.ingredients.map((i) => (
-                    <span className="chip" key={i.id}>
-                      {i.name}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {tasting.notes && <p className="muted pre">{tasting.notes}</p>}
+              <p className="muted pre">{tasting.notes}</p>
             </div>
           )}
           <RatingForm
@@ -253,7 +271,12 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
                 </table>
               </div>
               {tasting.average_overall != null && (
-                <p className="muted">Average overall: {fmt(tasting.average_overall)}</p>
+                <p className="muted">
+                  Average overall:{' '}
+                  <Explain title="Average Overall" text="The plain average of everyone's Overall score for this tea in this room.">
+                    {fmt(tasting.average_overall)}
+                  </Explain>
+                </p>
               )}
             </div>
           ) : null}

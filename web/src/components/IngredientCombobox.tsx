@@ -2,6 +2,7 @@ import { useId, useState, type KeyboardEvent } from 'react'
 
 import type { IngredientRef } from '../lib/api'
 import { splitIngredients } from '../lib/format'
+import { IngredientPhoto } from './IngredientPhoto'
 
 type Props = {
   id: string
@@ -26,8 +27,8 @@ export function IngredientCombobox({ id, value, options, onChange }: Props) {
     .slice(0, 8)
   const exact = options.some((o) => same(o.name, text)) || value.some((v) => same(v, text))
   const choices = [
-    ...matches.map((o) => ({ key: o.id, name: o.name, isNew: false })),
-    ...(query && !exact ? [{ key: 'new', name: text.trim(), isNew: true }] : []),
+    ...matches.map((o) => ({ key: o.id, name: o.name, isNew: false, known: o as IngredientRef | undefined })),
+    ...(query && !exact ? [{ key: 'new', name: text.trim(), isNew: true, known: undefined }] : []),
   ]
 
   const add = (names: string[]) => {
@@ -37,6 +38,7 @@ export function IngredientCombobox({ id, value, options, onChange }: Props) {
     setText('')
     setActive(0)
   }
+  const known = (name: string) => options.find((o) => same(o.name, name))
   const remove = (name: string) => onChange(value.filter((v) => v !== name))
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -64,6 +66,7 @@ export function IngredientCombobox({ id, value, options, onChange }: Props) {
       <div className="combo-box">
         {value.map((name) => (
           <span key={name} className="chip">
+            {known(name) && <IngredientPhoto ingredient={known(name)!} size={20} zoomable={false} />}
             {name}
             <button type="button" className="chip-x" aria-label={`Remove ${name}`} onClick={() => remove(name)}>
               ✕
@@ -111,7 +114,13 @@ export function IngredientCombobox({ id, value, options, onChange }: Props) {
               }}
               onMouseEnter={() => setActive(i)}
             >
-              {c.isNew && <span className="combo-icon">+</span>}
+              {c.isNew ? (
+                <span className="combo-icon">+</span>
+              ) : c.known?.image_url ? (
+                <IngredientPhoto ingredient={c.known} size={26} zoomable={false} />
+              ) : (
+                <span className="combo-icon" />
+              )}
               {c.isNew ? (
                 <span>
                   Add new “<b>{c.name}</b>”

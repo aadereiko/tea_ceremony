@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { api, type Ingredient } from '../lib/api'
 import { useIngredients } from '../lib/queries'
 import { useConfirm } from './Confirm'
+import { IngredientPhoto } from './IngredientPhoto'
 
 export function IngredientsView({ token, search }: { token: string; search: string }) {
   const { data, error, isPending } = useIngredients(token)
@@ -105,6 +106,7 @@ function IngredientRow({ token, ingredient, onMessage }: RowProps) {
   return (
     <li>
       <span className="ingredient-head">
+        <IngredientPhoto ingredient={ingredient} size={44} />
         <span className="tea-main">
           <b className="strong">{ingredient.name}</b>
           <span className="tea-sub">
@@ -112,6 +114,7 @@ function IngredientRow({ token, ingredient, onMessage }: RowProps) {
               ? 'Not used in any tea'
               : `In ${ingredient.tea_count} ${ingredient.tea_count === 1 ? 'tea' : 'teas'}`}
           </span>
+          {ingredient.image_credit && <span className="photo-credit">{ingredient.image_credit}</span>}
         </span>
       </span>
       <span className="actions">

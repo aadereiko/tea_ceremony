@@ -2,6 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 
+import { IngredientPhoto } from '../components/IngredientPhoto'
+import { ItemIcon } from '../components/ItemIcon'
+import { Leaf } from '../components/Leaf'
+import { TeaBadge } from '../components/TeaBadge'
 import { api, SCORE_FIELDS, shownTea, type Rating, type Tasting } from '../lib/api'
 import { teaColor } from '../lib/icons'
 import { tokenFor } from '../lib/sessions'
@@ -79,13 +83,31 @@ export function NotesPage() {
 
       <article className="notes-sheet">
         <header className="notes-head">
-          <p className="notes-eyebrow">Tea Ceremony · {info.name}</p>
-          <h1>{title}</h1>
-          <p className="notes-meta">
-            {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })} ·{' '}
-            {entries.length} {entries.length === 1 ? 'tea' : 'teas'}
-            {!person && ` · ${info.participants.length} tasters`}
-          </p>
+          <span className="notes-brand">
+            <Leaf size={16} />
+            Tea Ceremony
+          </span>
+          <div className="notes-title">
+            {person ? (
+              <ItemIcon name={person.icon} colorFrom={person.display_name} badge size={30} />
+            ) : (
+              <ItemIcon name={info.icon} colorFrom={info.name} badge size={30} />
+            )}
+            <div>
+              <h1>{title}</h1>
+              <p className="notes-meta">
+                <span className="with-icon">
+                  <ItemIcon name={info.icon} colorFrom={info.name} badge size={14} />
+                  {info.name}
+                </span>
+                <span>{new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <span>
+                  {entries.length} {entries.length === 1 ? 'tea' : 'teas'}
+                </span>
+                {!person && <span>{info.participants.length} tasters</span>}
+              </p>
+            </div>
+          </div>
         </header>
 
         {info.anonymous && person && person.id !== me.id ? (
@@ -95,61 +117,85 @@ export function NotesPage() {
         ) : entries.length === 0 ? (
           <p className="notes-empty">No notes yet.</p>
         ) : (
-          <table className="notes-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Tea</th>
-                <th>Brew</th>
-                <th>Ingredients</th>
-                {!person && <th>Taster</th>}
-                {SCORE_FIELDS.map((f) => (
-                  <th key={f} className="num">
-                    {f[0].toUpperCase() + f.slice(1)}
-                  </th>
-                ))}
-                <th>Buy again</th>
-                <th>Note</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.flatMap(({ tasting, tea: shown, position, ratings }) => {
-                const tea = [
-                  <td key="n" className="num">
-                    {position}
-                  </td>,
-                  <td key="t" className="strong">
-                    {shown.name}
-                  </td>,
-                  <td key="b">{teaColor(shown.color)?.name ?? ''}</td>,
-                  <td key="i">{tasting.tea?.ingredients.map((g) => g.name).join(', ')}</td>,
-                ]
-                const span = SCORE_FIELDS.length + (person ? 2 : 3)
-                if (!ratings?.length)
-                  return [
-                    <tr key={tasting.id} className="notes-muted-row">
-                      {tea}
-                      <td colSpan={span}>
-                        {ratings === null ? 'Hidden until someone reveals the scores' : 'No ratings yet'}
-                      </td>
-                    </tr>,
-                  ]
-                return ratings.map((r: Rating, n) => (
-                  <tr key={`${tasting.id}-${r.participant?.id ?? n}`}>
-                    {tea}
-                    {!person && <td>{r.participant?.display_name ?? (r.is_mine ? 'You' : 'Anonymous')}</td>}
-                    {SCORE_FIELDS.map((f) => (
-                      <td key={f} className="num">
-                        {r[f] ?? ''}
-                      </td>
-                    ))}
-                    <td>{r.buy_again == null ? '' : r.buy_again ? 'Yes' : 'No'}</td>
-                    <td className="note-cell">{r.note}</td>
-                  </tr>
-                ))
-              })}
-            </tbody>
-          </table>
+          <div className="table-wrap notes-table-wrap">
+            <table className="notes-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tea</th>
+                  <th>Ingredients</th>
+                  {!person && <th>Taster</th>}
+                  {SCORE_FIELDS.map((f) => (
+                    <th key={f}>{f}</th>
+                  ))}
+                  <th>Buy again</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.flatMap(({ tasting, tea: shown, position, ratings }) => {
+                  const rows = ratings?.length ? ratings : [null]
+                  return rows.map((r, n) => (
+                    <tr key={`${tasting.id}-${n}`} className={n === 0 ? 'tea-first' : 'tea-more'}>
+                      {n === 0 && (
+                        <>
+                          <td rowSpan={rows.length} className="muted">
+                            {position}
+                          </td>
+                          <td rowSpan={rows.length} className="notes-tea">
+                            <span className="with-icon">
+                              <TeaBadge tea={shown} size={16} />
+                              <span>
+                                <b>{shown.name}</b>
+                                {teaColor(shown.color) && <small className="muted">{teaColor(shown.color)!.name}</small>}
+                              </span>
+                            </span>
+                          </td>
+                          <td rowSpan={rows.length} className="notes-ingredients">
+                            {tasting.tea?.ingredients.map((g) => (
+                              <span className="chip" key={g.id}>
+                                <IngredientPhoto ingredient={g} size={16} zoomable={false} />
+                                {g.name}
+                              </span>
+                            ))}
+                          </td>
+                        </>
+                      )}
+                      {r === null ? (
+                        <td colSpan={SCORE_FIELDS.length + (person ? 2 : 3)} className="muted notes-missing">
+                          {ratings === null ? 'Scores hidden until someone reveals them' : 'No ratings yet'}
+                        </td>
+                      ) : (
+                        <>
+                          {!person && (
+                            <td className="notes-who">
+                              <span className="with-icon">
+                                {r.participant && (
+                                  <ItemIcon name={r.participant.icon} colorFrom={r.participant.display_name} badge size={14} />
+                                )}
+                                {r.participant?.display_name ?? (r.is_mine ? 'You' : 'Anonymous')}
+                              </span>
+                            </td>
+                          )}
+                          {SCORE_FIELDS.map((f) => (
+                            <td key={f}>
+                              <span className={`score-tile${f === 'overall' ? ' main' : ''}`}>{r[f] ?? '–'}</span>
+                            </td>
+                          ))}
+                          <td>
+                            {r.buy_again != null && (
+                              <span className={`buy-pill${r.buy_again ? ' yes' : ''}`}>{r.buy_again ? 'Yes' : 'No'}</span>
+                            )}
+                          </td>
+                          <td className="note-cell">{r.note}</td>
+                        </>
+                      )}
+                    </tr>
+                  ))
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {hidden && (
