@@ -114,7 +114,13 @@ function CatalogTeas({ token, search }: { token: string; search: string }) {
         <Heading kind="tea">
           Teas <span className="muted">{data.length}</span>
         </Heading>
-        <button className="primary small" onClick={() => setCreating(true)}>
+        <button
+          className="primary small"
+          onClick={() => {
+            create.reset()
+            setCreating(true)
+          }}
+        >
           + New tea
         </button>
       </div>

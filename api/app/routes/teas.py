@@ -39,7 +39,7 @@ def _rating_out(rating: Rating, me: Participant, anonymous: bool) -> RatingOut:
         **RatingIn.model_validate(rating, from_attributes=True).model_dump(),
         participant=None if anonymous else ParticipantOut.model_validate(rating.participant),
         is_mine=rating.participant_id == me.id,
-        updated_at=rating.updated_at,
+        updated_at=None if anonymous else rating.updated_at,
     )
 
 
@@ -55,6 +55,7 @@ def tasting_out(tasting: Tasting, member: Member, counts: dict[uuid.UUID, int]) 
     return TastingOut(
         id=tasting.id,
         tea=None if hidden else catalog_tea_out(tasting.tea, counts.get(tasting.tea_id, 1)),
+        tea_id=tasting.tea_id if not hidden or me.is_owner else None,
         hidden=hidden,
         added_by=ParticipantOut.model_validate(adder) if adder else None,
         created_at=tasting.created_at,

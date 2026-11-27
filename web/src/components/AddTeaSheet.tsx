@@ -40,6 +40,8 @@ export function AddTeaSheet({ open, slug, token, roomName, inRoom, onClose }: Pr
   }
 
   const query = search.trim().toLowerCase()
+  const exact = (catalog.data ?? []).some((t) => t.name.toLowerCase() === query)
+  const newName = exact ? '' : search.trim()
   const available = (catalog.data ?? []).filter(
     (t) =>
       !inRoom.has(t.id) &&
@@ -54,7 +56,7 @@ export function AddTeaSheet({ open, slug, token, roomName, inRoom, onClose }: Pr
         <>
           <TeaForm
             key="new"
-            initial={{ name: search.trim(), ingredients: [], icon: null, color: null, notes: '' }}
+            initial={{ name: newName, ingredients: [], icon: null, color: null, notes: '' }}
             known={known}
             submitLabel="Add to catalog and room"
             pending={add.isPending}
@@ -109,8 +111,14 @@ export function AddTeaSheet({ open, slug, token, roomName, inRoom, onClose }: Pr
                   : 'The catalog is empty. Create the first tea.'}
             </p>
           )}
-          <button className="primary" onClick={() => setCreating(true)}>
-            + {query ? `Create “${search.trim()}”` : 'Create a new tea'}
+          <button
+            className="primary"
+            onClick={() => {
+              add.reset()
+              setCreating(true)
+            }}
+          >
+            + {newName ? `Create “${newName}”` : 'Create a new tea'}
           </button>
         </>
       )}

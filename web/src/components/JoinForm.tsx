@@ -8,7 +8,9 @@ import { rememberSession, savedProfile } from '../lib/sessions'
 import { Field } from './Field'
 import { IconPicker } from './IconPicker'
 
-export function JoinForm({ slug, onJoined }: { slug: string; onJoined: (s: Session) => void }) {
+type Props = { slug: string; signedOut?: boolean; onJoined: (s: Session) => void }
+
+export function JoinForm({ slug, signedOut = false, onJoined }: Props) {
   const [password, setPassword] = useState('')
   const [profile] = useState(savedProfile)
   const [name, setName] = useState(profile.name)
@@ -29,6 +31,12 @@ export function JoinForm({ slug, onJoined }: { slug: string; onJoined: (s: Sessi
           Room code <b>{slug}</b>
         </p>
       </header>
+      {signedOut && (
+        <div className="notice small">
+          You're no longer signed in to this room. The host may have deleted it. If it still exists, join again
+          with its password.
+        </div>
+      )}
       <form
         className="panel"
         onSubmit={(e) => {

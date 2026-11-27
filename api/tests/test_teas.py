@@ -181,7 +181,9 @@ async def test_blind_room_hides_tea_until_anyone_reveals(client):
     assert tasting["hidden"] is True and tasting["tea"] is None
 
     seen = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(guest))).json()[0]
-    assert seen["tea"] is None
+    assert seen["tea"] is None and seen["tea_id"] is None
+    as_host = (await client.get(f"/api/rooms/{slug}/teas", headers=auth(host))).json()[0]
+    assert as_host["tea"] is None and as_host["tea_id"] == tasting["tea_id"]
     await rate(client, slug, guest, tasting["id"], 8)
     await reveal_scores(client, slug, guest, tasting["id"])
     ranking = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(guest))).json()
@@ -226,6 +228,8 @@ async def test_anonymous_room_hides_who_rated(client):
     data = (await client.get(f"/api/rooms/{slug}/analytics", headers=auth(host))).json()
     assert data["anonymous"] is True
     assert data["people"] == [] and data["agreement"] == []
+    assert data["taster_count"] == 2
+    assert all(r["updated_at"] is None for r in after["ratings"])
 
 
 async def test_only_host_changes_room_settings(client):

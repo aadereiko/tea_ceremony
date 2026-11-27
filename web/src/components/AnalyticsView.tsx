@@ -57,10 +57,10 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
         </div>
         <div>
           <b>{data.rating_count}</b>
-          <span className="label">Ratings</span>
+          <span className="label">Revealed ratings</span>
         </div>
         <div>
-          <b>{data.people.filter((p) => p.rated > 0).length}</b>
+          <b>{data.taster_count}</b>
           <span className="label">Tasters</span>
         </div>
       </div>
@@ -163,8 +163,9 @@ export function AnalyticsView({ slug, token }: { slug: string; token: string }) 
           </label>
         </div>
         <p className="muted small">
-          How teas with each ingredient scored compared with each person's usual Overall score. +1.5
-          means those teas got 1.5 points more than that person's average.
+          {data.anonymous
+            ? "How teas with each ingredient scored compared with each taster's usual Overall score, averaged over everyone."
+            : "How teas with each ingredient scored compared with each person's usual Overall score. +1.5 means those teas got 1.5 points more than that person's average."}
         </p>
         {ingredients.length === 0 ? (
           <div className="notice">No ingredient appears in {minTeas} rated teas yet.</div>

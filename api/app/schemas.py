@@ -164,13 +164,16 @@ class RatingOut(RatingIn):
     # None in an anonymous room; is_mine still lets you find your own row.
     participant: ParticipantOut | None
     is_mine: bool
-    updated_at: datetime
+    # None in an anonymous room too: save times could hint at who rated what.
+    updated_at: datetime | None
 
 
 class TastingOut(BaseModel):
     id: uuid.UUID
     # None while the room tastes blind and nobody has revealed this tea yet.
     tea: CatalogTeaOut | None
+    # Only the host gets this for a hidden tea, so "Add tea" can skip teas already in the room.
+    tea_id: uuid.UUID | None
     hidden: bool
     added_by: ParticipantOut | None
     created_at: datetime
@@ -238,6 +241,7 @@ class Agreement(BaseModel):
 
 class Analytics(BaseModel):
     anonymous: bool
+    taster_count: int
     tea_count: int
     rating_count: int
     ranking: list[TeaRank]

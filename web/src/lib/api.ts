@@ -16,7 +16,7 @@ export type RatingInput = Record<ScoreField, number | null> & {
   buy_again: boolean | null
   note: string
 }
-export type Rating = RatingInput & { participant: Participant | null; is_mine: boolean; updated_at: string }
+export type Rating = RatingInput & { participant: Participant | null; is_mine: boolean; updated_at: string | null }
 
 export type IngredientRef = { id: string; name: string }
 export type Ingredient = IngredientRef & { tea_count: number }
@@ -41,6 +41,7 @@ export type TeaInput = {
 export type Tasting = {
   id: string
   tea: CatalogTea | null
+  tea_id: string | null
   hidden: boolean
   added_by: Participant | null
   created_at: string
@@ -53,6 +54,7 @@ export type Tasting = {
 
 export type Analytics = {
   anonymous: boolean
+  taster_count: number
   tea_count: number
   rating_count: number
   ranking: {

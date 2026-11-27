@@ -109,8 +109,11 @@ def build_analytics(all_teas: list[Tasting], room: Room) -> Analytics:
         for row in ingredients:
             row.relative_by_person = {}
 
+    taster_count = len({r.participant_id for r in ratings})
+
     return Analytics(
         anonymous=room.anonymous,
+        taster_count=taster_count,
         tea_count=len(all_teas),
         rating_count=len(ratings),
         ranking=ranking,

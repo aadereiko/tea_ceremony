@@ -50,6 +50,8 @@ export function IngredientCombobox({ id, value, options, onChange }: Props) {
       if (open && choices[active]) add([choices[active].name])
       else if (query) add([text.trim()])
     } else if (e.key === 'Escape' && open) {
+      // preventDefault stops the surrounding <dialog> from treating Escape as "close the sheet".
+      e.preventDefault()
       e.stopPropagation()
       setOpen(false)
     } else if (e.key === 'Backspace' && !text && value.length) {

@@ -41,8 +41,12 @@ export function RoomPage() {
   const slug = (useParams().slug ?? '').toLowerCase()
   const [token, setToken] = useState(() => tokenFor(slug))
 
-  if (!token) return <JoinForm slug={slug} onJoined={(s) => setToken(s.token)} />
-  return <Room slug={slug} token={token} onSignedOut={() => setToken(null)} />
+  const [signedOut, setSignedOut] = useState(false)
+  if (!token) return <JoinForm slug={slug} signedOut={signedOut} onJoined={(s) => setToken(s.token)} />
+  return <Room slug={slug} token={token} onSignedOut={() => {
+        setSignedOut(true)
+        setToken(null)
+      }} />
 }
 
 function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSignedOut: () => void }) {
@@ -151,10 +155,18 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
             className="icon-action tip tip-below tip-end"
             data-tip="Leave on this device"
             aria-label="Leave on this device"
-            onClick={() => {
-              forgetRoom(slug)
-              navigate('/')
-            }}
+            onClick={() =>
+              confirm({
+                title: 'Leave this room on this device?',
+                message: `“${info.name}” will be forgotten in this browser. The room stays, and you can join again with its code and password.`,
+                confirmLabel: 'Leave',
+                danger: true,
+                action: () => {
+                  forgetRoom(slug)
+                  navigate('/')
+                },
+              })
+            }
           >
             <KindIcon kind="leave" size={18} />
           </button>
@@ -173,7 +185,7 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
             <h1>{info.name}</h1>
             <span className="muted small with-icon">
               <button
-                className="code-copy tip tip-below"
+                className="code-copy tip tip-right"
                 data-tip={copied === 'code' ? 'Copied' : 'Copy code'}
                 aria-label={copied === 'code' ? 'Room code copied' : `Copy room code ${slug}`}
                 onClick={() => copy('code')}
@@ -274,11 +286,12 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
                 ]
                   .filter(Boolean)
                   .join(' · ')
-                const score = tasting.my_rating ? (
-                  <span className="score-pill">
-                    {tasting.average_overall != null ? fmt(tasting.average_overall) : '✓'}
-                  </span>
-                ) : null
+                const score =
+                  tasting.average_overall != null ? (
+                    <span className="score-pill">{fmt(tasting.average_overall)}</span>
+                  ) : tasting.my_rating ? (
+                    <span className="score-pill">✓</span>
+                  ) : null
                 return (
                   <li key={tasting.id}>
                     {view === 'cards' ? (
@@ -365,7 +378,7 @@ function Room({ slug, token, onSignedOut }: { slug: string; token: string; onSig
         slug={slug}
         token={token}
         roomName={info.name}
-        inRoom={new Set(tastings.flatMap((t) => (t.tea ? [t.tea.id] : [])))}
+        inRoom={new Set(tastings.flatMap((t) => (t.tea?.id ?? t.tea_id ? [t.tea?.id ?? t.tea_id!] : [])))}
         onClose={() => setAdding(false)}
       />
       <Sheet open={picking === 'more'} onClose={() => setPicking(null)} eyebrow={info.name} title="More">

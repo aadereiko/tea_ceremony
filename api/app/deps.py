@@ -10,7 +10,9 @@ from app.db import get_db
 from app.models import Participant, ParticipantSession, Room
 from app.security import hash_token
 
-Db = Annotated[AsyncSession, Depends(get_db)]
+# scope="function" commits before the response is sent. With the default, the commit runs after
+# the client already has its answer, so a refetch right after a change could read the old data.
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
 
 
 @dataclass

@@ -88,7 +88,11 @@ export function NotesPage() {
           </p>
         </header>
 
-        {entries.length === 0 ? (
+        {info.anonymous && person && person.id !== me.id ? (
+          <p className="notes-empty">
+            This room rates anonymously, so notes can't be shown for one person. Open the room notes instead.
+          </p>
+        ) : entries.length === 0 ? (
           <p className="notes-empty">No notes yet.</p>
         ) : (
           <table className="notes-table">

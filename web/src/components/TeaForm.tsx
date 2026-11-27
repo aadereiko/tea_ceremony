@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { IngredientRef, TeaInput } from '../lib/api'
 import { TEA_COLORS, TEA_ICONS, teaColor } from '../lib/icons'
@@ -20,12 +20,20 @@ export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit 
   const [icon, setIcon] = useState(initial?.icon ?? null)
   const [color, setColor] = useState(initial?.color ?? null)
   const [notes, setNotes] = useState(initial?.notes ?? '')
+  // An error belongs to the values that caused it; hide it once the user changes anything.
+  const [edited, setEdited] = useState(false)
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (mounted.current) setEdited(true)
+    mounted.current = true
+  }, [name, ingredients, icon, color, notes])
 
   return (
     <form
       className="stack"
       onSubmit={(e) => {
         e.preventDefault()
+        setEdited(false)
         onSubmit({ name, ingredients, icon, color, notes })
       }}
     >
@@ -84,7 +92,7 @@ export function TeaForm({ initial, known, submitLabel, pending, error, onSubmit 
           placeholder="Brew at 80 °C for 4 minutes"
         />
       </label>
-      {error && <p className="error">{error}</p>}
+      {error && !edited && <p className="error">{error}</p>}
       <button className="primary" disabled={pending}>
         {pending ? 'Saving…' : submitLabel}
       </button>

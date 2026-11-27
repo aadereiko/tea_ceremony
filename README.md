@@ -36,8 +36,8 @@ likes in the Analytics tab.
   (`web/src/lib/illustrations.tsx`), picked by the user or at random. The database stores the
   icon's name, and the API only accepts names from the right set. Teas also have a brew colour
   from a fixed list of real tea colours (`web/src/lib/icons.ts`).
-- **Ratings:** Smell, Taste, Finish, Overall (0 to 10), Would buy again, and a note. Other
-  people's scores for a tea stay hidden until you've rated it yourself.
+- **Ratings:** Smell, Taste, Finish, Overall (0 to 10), Would buy again, and a note. Each
+  change saves on its own. Everyone's scores for a tea stay hidden until someone reveals them.
 - **Analytics:** ranking by average Overall, each taster's averages, ingredient preferences
   (each tea's score compared with that person's own average, so a generous scorer doesn't skew
   it), and how closely each pair of tasters agrees.

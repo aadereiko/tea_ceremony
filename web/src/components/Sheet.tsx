@@ -18,6 +18,7 @@ export function Sheet({ open, onClose, eyebrow, title, children }: Props) {
     if (!dialog) return
     if (open && !dialog.open) {
       dialog.showModal()
+      dialog.scrollTop = 0
       // showModal() moves focus to the first focusable element (the close button), undoing React's
       // autoFocus; typing a space would then close the sheet.
       dialog.querySelector<HTMLElement>('[data-autofocus]')?.focus()
