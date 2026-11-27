@@ -183,11 +183,13 @@ export function NotesPage() {
                             </td>
                           ))}
                           <td>
-                            {r.buy_again != null && (
+                            {r.buy_again == null ? (
+                              <span className="muted">–</span>
+                            ) : (
                               <span className={`buy-pill${r.buy_again ? ' yes' : ''}`}>{r.buy_again ? 'Yes' : 'No'}</span>
                             )}
                           </td>
-                          <td className="note-cell">{r.note}</td>
+                          <td className="note-cell">{r.note || <span className="muted">–</span>}</td>
                         </>
                       )}
                     </tr>
