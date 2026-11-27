@@ -26,7 +26,7 @@ test('joining a room remembers your name and animal for next time', () => {
   expect(savedProfile()).toEqual({ name: '', icon: null })
   rememberSession({
     token: 't',
-    room: { slug: 'a', name: 'A', icon: 'moon', blind: false, anonymous: false, participants: [] },
+    room: { slug: 'a', name: 'A', icon: 'moon', blind: false, anonymous: false, hide_scores: false, participants: [] },
     me: { id: '1', display_name: 'Sashka', icon: 'fox', is_owner: true },
   } satisfies Session)
   expect(savedProfile()).toEqual({ name: 'Sashka', icon: 'fox' })

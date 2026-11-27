@@ -5,6 +5,7 @@ export type Room = {
   icon: string
   blind: boolean
   anonymous: boolean
+  hide_scores: boolean
   participants: Participant[]
 }
 export type Session = { token: string; room: Room; me: Participant }
@@ -43,6 +44,7 @@ export type Tasting = {
   tea: CatalogTea | null
   tea_id: string | null
   hidden: boolean
+  notes: string
   added_by: Participant | null
   created_at: string
   rating_count: number
@@ -124,6 +126,7 @@ export const api = {
     my_icon: string | null
     blind: boolean
     anonymous: boolean
+    hide_scores: boolean
   }) =>
     request<Session>('/api/rooms', { method: 'POST', body: JSON.stringify(body) }),
   joinRoom: (slug: string, body: { password: string; display_name: string; my_icon: string | null }) =>
@@ -132,7 +135,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
   room: (slug: string, token: string) => request<Session>(`/api/rooms/${slug}`, { token }),
-  updateRoom: (slug: string, token: string, body: { icon?: string; blind?: boolean; anonymous?: boolean }) =>
+  updateRoom: (slug: string, token: string, body: { icon?: string; blind?: boolean; anonymous?: boolean; hide_scores?: boolean }) =>
     request<Session>(`/api/rooms/${slug}`, { method: 'PATCH', token, body: JSON.stringify(body) }),
   updateMe: (slug: string, token: string, body: { icon: string }) =>
     request<Session>(`/api/rooms/${slug}/me`, { method: 'PATCH', token, body: JSON.stringify(body) }),

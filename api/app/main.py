@@ -5,12 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.config import get_settings
+from app.config import APP_VERSION, get_settings
 from app.routes import catalog, rooms, teas
 
 settings = get_settings()
 
-app = FastAPI(title="Tea Ceremony API", version="0.1.0")
+app = FastAPI(title="Tea Ceremony API", version=APP_VERSION)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -24,7 +24,7 @@ app.include_router(catalog.router)
 
 @app.get("/api/health")
 async def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "version": APP_VERSION}
 
 
 static = Path(settings.static_dir)

@@ -83,6 +83,7 @@ export function HomePage() {
           you.
         </div>
       )}
+      <p className="app-version muted small">Tea Ceremony v{__APP_VERSION__}</p>
       {confirmDialog}
     </main>
   )

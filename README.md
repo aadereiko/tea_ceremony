@@ -87,3 +87,8 @@ Same idea: create a Postgres database, deploy this repository from its `Dockerfi
 
 Edit `api/app/models.py`, then `make revision m="what changed"` and commit the new file in
 `api/alembic/versions/`. It runs on the next deploy.
+
+## Releasing a new version
+
+Change `version` in both `api/pyproject.toml` and `web/package.json` (a test fails if they differ).
+The home page shows it, and `/api/health` reports it, so you can check what a deploy is running.

@@ -1,3 +1,4 @@
+import tomllib
 from functools import lru_cache
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 API_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = API_ROOT.parent
+APP_VERSION = tomllib.loads((API_ROOT / "pyproject.toml").read_text())["project"]["version"]
 
 
 class Settings(BaseSettings):

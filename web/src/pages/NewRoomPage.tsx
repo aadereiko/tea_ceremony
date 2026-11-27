@@ -21,6 +21,7 @@ export function NewRoomPage() {
     my_icon: profile.icon,
     blind: true,
     anonymous: false,
+    hide_scores: false,
   })
   const create = useMutation({
     mutationFn: () => api.createRoom(form),
@@ -96,7 +97,14 @@ export function NewRoomPage() {
           label="Anonymous ratings"
           hint="Nobody sees who gave which score or note."
           checked={form.anonymous}
-          onChange={(anonymous) => setForm({ ...form, anonymous })}
+          onChange={(anonymous) => setForm({ ...form, anonymous, hide_scores: anonymous })}
+        />
+        <Toggle
+          id="create-hide-scores"
+          label="Hide scores until revealed"
+          hint="Scores stay hidden until someone reveals them for each tea, so nobody is swayed by the others. On by default for anonymous ratings."
+          checked={form.hide_scores}
+          onChange={(hide_scores) => setForm({ ...form, hide_scores })}
         />
         {create.error && <p className="error">{create.error.message}</p>}
         <button className="primary" disabled={create.isPending}>
