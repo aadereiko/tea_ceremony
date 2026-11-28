@@ -218,6 +218,7 @@ class TastingOut(BaseModel):
 
 class IngredientOut(IngredientRef):
     tea_count: int
+    built_in: bool
 
 
 class IngredientRename(BaseModel):

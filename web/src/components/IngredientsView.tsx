@@ -23,8 +23,8 @@ export function IngredientsView({ token, search }: { token: string; search: stri
   return (
     <section className="stack-sm">
       <p className="muted small">
-        Shared by every tea in the app. Rename one to fix a typo everywhere. Renaming it to a name that
-        already exists merges the two.
+        Shared by every tea in the app. The ones with a photo come with the app and stay. Rename any other
+        one to fix a typo everywhere; renaming it to a name that already exists merges the two.
       </p>
       {message && <div className="notice small">{message}</div>}
       {shown.length === 0 ? (
@@ -131,7 +131,8 @@ function IngredientRow({ token, ingredient, onMessage, onOpen }: RowProps) {
           {ingredient.image_credit && <span className="photo-credit">{ingredient.image_credit}</span>}
         </button>
       </span>
-      <span className="actions">
+      {!ingredient.built_in && (
+        <span className="actions">
           <button className="ghost small" onClick={() => setMode('rename')}>
             Rename
           </button>
@@ -140,9 +141,12 @@ function IngredientRow({ token, ingredient, onMessage, onOpen }: RowProps) {
             onClick={() =>
               confirm({
                 title: 'Delete this ingredient?',
-                message: `“${ingredient.name}” will be removed from ${
-                  ingredient.tea_count === 1 ? 'the 1 tea' : `all ${ingredient.tea_count} teas`
-                } that list it, for everyone. This can't be undone.`,
+                message:
+                  ingredient.tea_count === 0
+                    ? `“${ingredient.name}” isn't in any tea. It will be removed from the catalog for everyone.`
+                    : `“${ingredient.name}” will be removed from ${
+                        ingredient.tea_count === 1 ? 'the 1 tea' : `all ${ingredient.tea_count} teas`
+                      } that list it, for everyone. This can't be undone.`,
                 confirmLabel: 'Delete ingredient',
                 danger: true,
                 action: () => remove.mutateAsync(),
@@ -151,7 +155,8 @@ function IngredientRow({ token, ingredient, onMessage, onOpen }: RowProps) {
           >
             Delete
           </button>
-      </span>
+        </span>
+      )}
       {confirmDialog}
       {(update.error || remove.error) && (
         <p className="error">{(update.error ?? remove.error)!.message}</p>

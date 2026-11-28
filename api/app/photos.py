@@ -19,8 +19,12 @@ def apply_known_photo(ingredient: Ingredient) -> None:
         ingredient.image_source = photo["source"]
 
 
+def is_built_in(ingredient: Ingredient) -> bool:
+    return ingredient.name_key in KNOWN_PHOTOS
+
+
 # Every ingredient with a shipped photo exists in the catalog, so people can pick it before any
-# tea uses it. One deleted by hand comes back on the next start: the photo list is the starter set.
+# tea uses it. That is why the API refuses to rename or delete these: they would come back.
 async def fill_known_photos(db: AsyncSession) -> None:
     present = {
         i.name_key: i
