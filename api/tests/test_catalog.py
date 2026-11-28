@@ -66,9 +66,9 @@ async def test_rename_into_existing_merges(client):
 
 async def test_delete_ingredient_removes_it_from_teas(client):
     slug, me, _ = await setup_two(client)
-    await add_new_tea(client, slug, me, "A", ["Vanilla", "Rose"])
+    await add_new_tea(client, slug, me, "A", ["Vanilla", "Moon dust"])
     found = await ingredients(client, me)
-    url = f"/api/catalog/ingredients/{found['Rose']['id']}"
+    url = f"/api/catalog/ingredients/{found['Moon dust']['id']}"
     assert (await client.delete(url, headers=auth(me))).status_code == 204
     teas = (await client.get("/api/catalog/teas", headers=auth(me))).json()
     assert [i["name"] for i in teas[0]["ingredients"]] == ["Vanilla"]

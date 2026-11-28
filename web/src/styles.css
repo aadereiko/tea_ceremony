@@ -426,7 +426,8 @@ h2.with-icon, h3.with-icon { display: flex; }
 .brand .kind-icon { color: inherit; }
 .brand-icon { border: 0; font-size: 24px; }
 .brand-icon:disabled { opacity: 1; cursor: default; }
-.ingredient-head { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.ingredient-head { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 220px; }
+.ingredient-head + .actions { margin-left: auto; }
 .inline-edit { display: flex; gap: 8px; align-items: center; width: 100%; }
 .inline-edit input { flex: 1; }
 
@@ -927,3 +928,8 @@ a.shop-chip { color: inherit; text-decoration: none; gap: 6px; }
 @keyframes bubble-in { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .bubble { animation: none; } }
 
+.link-button { border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; display: grid; }
+.link-button:hover .strong { text-decoration: underline; text-underline-offset: 3px; }
+.chip-button { border: 0; color: inherit; font: inherit; cursor: pointer; }
+@media (hover: hover) { .chip-button:hover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent); } }
+.ingredient-hero { display: flex; align-items: center; gap: 14px; }

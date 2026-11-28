@@ -86,7 +86,10 @@ function CatalogTeas({ token, search }: { token: string; search: string }) {
   const { data, error, isPending } = useCatalogTeas(token)
   const known = useIngredients(token).data ?? []
   const shops = useShops(token).data ?? []
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  // Kept in the address so a link elsewhere (an ingredient's teas) can open a tea here.
+  const openId = searchParams.get('tea')
+  const setOpenId = (id: string | null) => setSearchParams(id ? { tea: id } : {})
   const [creating, setCreating] = useState(false)
 
   const create = useMutation({

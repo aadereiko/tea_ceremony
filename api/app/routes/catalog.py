@@ -7,7 +7,7 @@ from app.catalog import TEA_LOAD, catalog_tea_out, create_tea, edit_tea, load_te
 from app.deps import AnyMember, Db
 from app.models import Ingredient, Tea, TeaIngredient
 from app.names import normalize_name
-from app.photos import apply_known_photo
+from app.photos import apply_known_photo, is_built_in
 from app.schemas import (
     CatalogTeaOut,
     IngredientOut,
@@ -59,6 +59,7 @@ def _with_count(ingredient: Ingredient, tea_count: int) -> IngredientOut:
         image_credit=ingredient.image_credit,
         image_source=ingredient.image_source,
         tea_count=tea_count,
+        built_in=is_built_in(ingredient),
     )
 
 
@@ -80,6 +81,15 @@ async def list_ingredients(_: AnyMember, db: Db) -> list[IngredientOut]:
     return [_with_count(i, count) for i, count in rows]
 
 
+# Built-in ingredients are recreated under their own name on every start, so renaming or deleting
+# one would only leave a duplicate behind or bring it back after the next deploy.
+def _refuse_built_in(ingredient: Ingredient) -> None:
+    if is_built_in(ingredient):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Built-in ingredients can't be renamed or deleted"
+        )
+
+
 @router.patch("/ingredients/{ingredient_id}")
 async def rename_ingredient(
     ingredient_id: uuid.UUID, body: IngredientRename, _: AnyMember, db: Db
@@ -88,6 +98,8 @@ async def rename_ingredient(
     if ingredient is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Ingredient not found")
     key = normalize_name(body.name)
+    if key != ingredient.name_key:
+        _refuse_built_in(ingredient)
     target = await db.scalar(
         select(Ingredient).where(Ingredient.name_key == key, Ingredient.id != ingredient.id)
     )
@@ -121,5 +133,8 @@ async def rename_ingredient(
 
 @router.delete("/ingredients/{ingredient_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_ingredient(ingredient_id: uuid.UUID, _: AnyMember, db: Db) -> Response:
+    ingredient = await db.get(Ingredient, ingredient_id)
+    if ingredient is not None:
+        _refuse_built_in(ingredient)
     await db.execute(delete(Ingredient).where(Ingredient.id == ingredient_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,11 +19,20 @@ def apply_known_photo(ingredient: Ingredient) -> None:
         ingredient.image_source = photo["source"]
 
 
+def is_built_in(ingredient: Ingredient) -> bool:
+    return ingredient.name_key in KNOWN_PHOTOS
+
+
+# Every ingredient with a shipped photo exists in the catalog, so people can pick it before any
+# tea uses it. That is why the API refuses to rename or delete these: they would come back.
 async def fill_known_photos(db: AsyncSession) -> None:
-    missing = await db.scalars(
-        select(Ingredient).where(
-            Ingredient.image_url.is_(None), Ingredient.name_key.in_(KNOWN_PHOTOS)
-        )
-    )
-    for ingredient in missing:
+    present = {
+        i.name_key: i
+        for i in await db.scalars(select(Ingredient).where(Ingredient.name_key.in_(KNOWN_PHOTOS)))
+    }
+    for key, photo in KNOWN_PHOTOS.items():
+        ingredient = present.get(key)
+        if ingredient is None:
+            ingredient = Ingredient(name=photo["name"], name_key=key)
+            db.add(ingredient)
         apply_known_photo(ingredient)

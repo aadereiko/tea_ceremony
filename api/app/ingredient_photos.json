@@ -1,9 +1,21 @@
 [
   {
+    "name": "allspice",
+    "file": "allspice.webp",
+    "credit": "Photo: Jonathunder, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:AllspiceBowl.JPG"
+  },
+  {
     "name": "almond",
     "file": "almond.webp",
     "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Almonds_-_in_shell,_shell_cracked_open,_shelled,_blanched.jpg"
+  },
+  {
+    "name": "anise",
+    "file": "anise.webp",
+    "credit": "Photo: OttawaAC, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Anise_Seed.jpg"
   },
   {
     "name": "apple",
@@ -16,6 +28,18 @@
     "file": "apricot.webp",
     "credit": "Photo: Benjamint444, CC BY-SA 3.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Apricot_whole444.jpg"
+  },
+  {
+    "name": "assam",
+    "file": "assam.webp",
+    "credit": "Photo: soultea.de/André Helbig, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Assam-Tee_SFTGFOP1.jpg"
+  },
+  {
+    "name": "banana",
+    "file": "banana.webp",
+    "credit": "Photo: Krzysztof Golik, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Bananas_on_black_background_02.jpg"
   },
   {
     "name": "beetroot",
@@ -36,16 +60,46 @@
     "source": "https://commons.wikimedia.org/wiki/File:Ceylon_tea_Leafs.JPG"
   },
   {
+    "name": "blackberry",
+    "file": "blackberry.webp",
+    "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Blackberries_(Rubus_fruticosus).jpg"
+  },
+  {
+    "name": "blackcurrant",
+    "file": "blackcurrant.webp",
+    "credit": "Photo: Saxo, Public domain, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Schwarzejohannisbeere.jpg"
+  },
+  {
+    "name": "blueberry",
+    "file": "blueberry.webp",
+    "credit": "Photo: Petar Milošević, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Dish_of_blueberries.jpg"
+  },
+  {
     "name": "buckwheat",
     "file": "buckwheat.webp",
     "credit": "Photo: Fumikas Sagisavas, CC0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Buckwheat_tea.jpg"
   },
   {
+    "name": "butterfly pea flower",
+    "file": "butterfly-pea-flower.webp",
+    "credit": "Photo: Soulful sunshine, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Aparajita_(Clitoria_ternatea)_(Blue_butterfly_pea_flower).jpg"
+  },
+  {
     "name": "calendula",
     "file": "calendula.webp",
     "credit": "Photo: Ermell, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Ringelblume_(Calendula_officinalis)_Bl%C3%BCte_focus_stack-20220619-RM-165610.jpg"
+  },
+  {
+    "name": "caramel",
+    "file": "caramel.webp",
+    "credit": "Photo: Where next Columbus?, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Caramel-3.jpg"
   },
   {
     "name": "cardamom",
@@ -58,6 +112,36 @@
     "file": "carrot.webp",
     "credit": "Photo: Collegestudent33, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Carrot-fb.jpg"
+  },
+  {
+    "name": "chamomile",
+    "file": "chamomile.webp",
+    "credit": "Photo: YuJeen from Riga, Latvia, CC BY 2.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Chamomile_(14561518539).jpg"
+  },
+  {
+    "name": "cherry",
+    "file": "cherry.webp",
+    "credit": "Photo: Silar, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:02024_May_Duke_Cherry,_Beskids_mts.jpg"
+  },
+  {
+    "name": "chicory",
+    "file": "chicory.webp",
+    "credit": "Photo: Phil'enCorse, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Chicor%C3%A9e_en_grains.jpg"
+  },
+  {
+    "name": "chocolate",
+    "file": "chocolate.webp",
+    "credit": "Photo: Mx. Granger, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Green_and_Black%27s_dark_chocolate_bar_2.jpg"
+  },
+  {
+    "name": "chrysanthemum",
+    "file": "chrysanthemum.webp",
+    "credit": "Photo: Fumikas Sagisavas, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Chrysanthemum_tea_(20240131).jpg"
   },
   {
     "name": "cinnamon",
@@ -78,6 +162,12 @@
     "source": "https://commons.wikimedia.org/wiki/File:Cocoa_Nibs_in_Bowl.jpg"
   },
   {
+    "name": "coconut",
+    "file": "coconut.webp",
+    "credit": "Photo: Fumikas Sagisavas, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Toasted_coconut_flakes_(1).jpg"
+  },
+  {
     "name": "coriander",
     "file": "coriander.webp",
     "credit": "Photo: Sanjay Acharya, CC BY-SA 4.0, via Wikimedia Commons",
@@ -90,10 +180,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Centaurea_cyanus_RF.jpg"
   },
   {
+    "name": "cranberry",
+    "file": "cranberry.webp",
+    "credit": "Photo: Ayotte, Gilles, 1948-, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Vaccinium_macrocarpon_15-p.bot-vacci.macro-11.jpg"
+  },
+  {
     "name": "cream",
     "file": "cream.webp",
     "credit": "Photo: Mx. Granger, CC0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Vegan_whipped_cream.jpg"
+  },
+  {
+    "name": "dandelion",
+    "file": "dandelion.webp",
+    "credit": "Photo: Sanjay Acharya, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Dandelion_Flower_close_up.jpg"
+  },
+  {
+    "name": "darjeeling",
+    "file": "darjeeling.webp",
+    "credit": "Photo: Vyacheslav Argenberg, CC BY 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Darjeeling,_India,_Fermented_tea_leaves.jpg"
+  },
+  {
+    "name": "echinacea",
+    "file": "echinacea.webp",
+    "credit": "Photo: Krzysztof Golik, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Echinacea_purpurea_in_Jardin_botanique_de_la_Charme_01.jpg"
   },
   {
     "name": "elderberry",
@@ -108,10 +222,40 @@
     "source": "https://commons.wikimedia.org/wiki/File:00_3775_Schwarzer_Hollunder_(Sambucus_nigra).jpg"
   },
   {
+    "name": "eucalyptus",
+    "file": "eucalyptus.webp",
+    "credit": "Photo: JonRichfield, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Eucalyptus_camaldulensis_isobilateral_leaves_IMG_1997c.jpg"
+  },
+  {
+    "name": "fennel",
+    "file": "fennel.webp",
+    "credit": "Photo: NanaYawBotar, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Fennel_seeds_01.jpg"
+  },
+  {
+    "name": "fig",
+    "file": "fig.webp",
+    "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Fig_(Ficus_carica)_fruit_halved.jpg"
+  },
+  {
     "name": "ginger",
     "file": "ginger.webp",
     "credit": "Photo: Mk2010, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Ginger_rhizome.jpg"
+  },
+  {
+    "name": "ginseng",
+    "file": "ginseng.webp",
+    "credit": "Photo: 국립국어원, CC BY-SA 2.0 kr, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Insam_(ginseng).jpg"
+  },
+  {
+    "name": "goji berry",
+    "file": "goji-berry.webp",
+    "credit": "Photo: Myrabella, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Goji_dried_berries.jpg"
   },
   {
     "name": "grapefruit",
@@ -132,16 +276,70 @@
     "source": "https://commons.wikimedia.org/wiki/File:Gr%C3%BCner_Tee_Gunpowder.jpg"
   },
   {
+    "name": "gyokuro",
+    "file": "gyokuro.webp",
+    "credit": "Photo: Rama, CC BY-SA 2.0 fr, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Gyokuro_img_0067.jpg"
+  },
+  {
+    "name": "hazelnut",
+    "file": "hazelnut.webp",
+    "credit": "Photo: Fir0002 at English Wikipedia, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Hazelnuts.jpg"
+  },
+  {
     "name": "hibiscus",
     "file": "hibiscus.webp",
     "credit": "Photo: Emily Allen from Minneapolis, USA, CC BY 2.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Dried_Hibiscus_flowers.jpg"
   },
   {
+    "name": "hojicha",
+    "file": "hojicha.webp",
+    "credit": "Photo: Francois Mathieu, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Hojicha_Dark_Roast.jpg"
+  },
+  {
+    "name": "holy basil",
+    "file": "holy-basil.webp",
+    "credit": "Photo: Diamante Phi, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Holy_Basil(Rama;Ocimum_tenuiflorum).jpg"
+  },
+  {
+    "name": "honey",
+    "file": "honey.webp",
+    "credit": "Photo: Tasmanianbeekeepers, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Jar_and_honey_stick.jpg"
+  },
+  {
+    "name": "honeybush",
+    "file": "honeybush.webp",
+    "credit": "Photo: soultea.de/André Helbig, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Honigbusch_(Honeybush)_geschnitten_und_getrocknet.jpg"
+  },
+  {
     "name": "jasmine",
     "file": "jasmine.webp",
     "credit": "Photo: Jaka firman purnama, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Melati_Putih_(Jasminum_sambac),_Bandung,_Jawa_Barat.jpg"
+  },
+  {
+    "name": "juniper berry",
+    "file": "juniper-berry.webp",
+    "credit": "Photo: Dominikmatus, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Juniperus-spice.jpg"
+  },
+  {
+    "name": "kaffir lime leaf",
+    "file": "kaffir-lime-leaf.webp",
+    "credit": "Photo: Mokkie, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Kaffir_Lime_(Citrus_hystrix).jpg"
+  },
+  {
+    "name": "lapsang souchong",
+    "file": "lapsang-souchong.webp",
+    "credit": "Photo: Difference engine, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Lapsang_Souchong.jpg"
   },
   {
     "name": "lavender",
@@ -162,16 +360,46 @@
     "source": "https://commons.wikimedia.org/wiki/File:Starr-070906-8824-Melissa_officinalis-leaves-Kula_Ace_Hardware_and_Nursery-Maui_(24524482419).jpg"
   },
   {
+    "name": "lemon myrtle",
+    "file": "lemon-myrtle.webp",
+    "credit": "Photo: Krzysztof Ziarnek, Kenraiz, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Backhousia_citriodora_kz04.jpg"
+  },
+  {
+    "name": "lemon verbena",
+    "file": "lemon-verbena.webp",
+    "credit": "Photo: ViajeroExtraviado, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Leaves_of_Aloysia_citrodora.jpg"
+  },
+  {
     "name": "lemongrass",
     "file": "lemongrass.webp",
     "credit": "Photo: Steffen Bauer (www.saatpilot.de), CC BY 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Cymbopogon_flexuosus_(East_Indian_lemongrass),_harvested_stalks_(SaatPilot).jpg"
   },
   {
+    "name": "licorice root",
+    "file": "licorice-root.webp",
+    "credit": "Photo: Salil Kumar Mukherjee, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Sections_of_liquorice_root.jpg"
+  },
+  {
+    "name": "lime",
+    "file": "lime.webp",
+    "credit": "Photo: Jiafei Slay Queen, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Limes_with_halves.jpg"
+  },
+  {
     "name": "linden",
     "file": "linden.webp",
     "credit": "Photo: Meneerke bloem, CC BY-SA 3.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Tilia_cordata_flowers_002.jpg"
+  },
+  {
+    "name": "lychee",
+    "file": "lychee.webp",
+    "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Lychee_fruits_and_seed.jpg"
   },
   {
     "name": "mallow",
@@ -198,10 +426,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Marjoram_leaves.JPG"
   },
   {
+    "name": "matcha",
+    "file": "matcha.webp",
+    "credit": "Photo: Evanhoever, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Matcha_Scoop.jpg"
+  },
+  {
+    "name": "moringa",
+    "file": "moringa.webp",
+    "credit": "Photo: JMSA2018, CC BY 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Moringa_Steam_Pot_and_Leaves_2018.jpg"
+  },
+  {
     "name": "mulled wine",
     "file": "mulled-wine.webp",
     "credit": "Photo: Wheeler Cowperthwaite, CC BY 2.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Gl%C3%BChwein_(hot_mulled_wine)_in_a_glass_with_an_orange_slice_30.jpg"
+  },
+  {
+    "name": "nettle",
+    "file": "nettle.webp",
+    "credit": "Photo: ITookSomePhotos, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Nettle_leaves,_near_Newport,_Isle_of_Wight,_England.jpg"
+  },
+  {
+    "name": "nutmeg",
+    "file": "nutmeg.webp",
+    "credit": "Photo: Miansari66, Public domain, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Nutmeg_whole.JPG"
   },
   {
     "name": "oolong",
@@ -220,6 +472,18 @@
     "file": "orange-blossom.webp",
     "credit": "Photo: Lynda, CC BY 2.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Orange_blossom._(3022652749).jpg"
+  },
+  {
+    "name": "osmanthus",
+    "file": "osmanthus.webp",
+    "credit": "Photo: Laitr Keiows, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Osmanthus_fragrans_(orange_flowers).jpg"
+  },
+  {
+    "name": "papaya",
+    "file": "papaya.webp",
+    "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Papaya_-_longitudinal_section.jpg"
   },
   {
     "name": "passion fruit",
@@ -246,10 +510,28 @@
     "source": "https://commons.wikimedia.org/wiki/File:Black_Peppercorns_(4422070187).jpg"
   },
   {
+    "name": "peppermint",
+    "file": "peppermint.webp",
+    "credit": "Photo: Rillke, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Field_of_Mentha_x_piperita_02.jpg"
+  },
+  {
+    "name": "pineapple",
+    "file": "pineapple.webp",
+    "credit": "Photo: Wilfredor, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Pineapple_fruit_2.jpg"
+  },
+  {
     "name": "pink pepper",
     "file": "pink-pepper.webp",
     "credit": "Photo: Tiia Monto, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Pink_peppercorn.jpg"
+  },
+  {
+    "name": "plum",
+    "file": "plum.webp",
+    "credit": "Photo: Rodrigo.Argenton, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Plum_in_a_black_background_01.jpg"
   },
   {
     "name": "pomegranate",
@@ -264,10 +546,28 @@
     "source": "https://commons.wikimedia.org/wiki/File:Yunnan_Sourcing_%22Golden_Pig%22_Raw_Pu-erh_Tea_Cake_-_opened_-_WikiTea_01.jpg"
   },
   {
+    "name": "quince",
+    "file": "quince.webp",
+    "credit": "Photo: Rhododendrites, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Quince_(10889s).jpg"
+  },
+  {
+    "name": "raspberry",
+    "file": "raspberry.webp",
+    "credit": "Photo: Ivar Leidus, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Raspberry_-_whole_(Rubus_idaeus).jpg"
+  },
+  {
     "name": "rhubarb",
     "file": "rhubarb.webp",
     "credit": "Photo: Dieter Weber (Uellue), CC BY-SA 3.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Rheum_rhabarbarum.2006-04-27.uellue.jpg"
+  },
+  {
+    "name": "roasted barley",
+    "file": "roasted-barley.webp",
+    "credit": "Photo: Fumikas Sagisavas, CC0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Dried_barley_tea_(2).jpg"
   },
   {
     "name": "roasted rice",
@@ -288,10 +588,52 @@
     "source": "https://commons.wikimedia.org/wiki/File:Cup_of_rosebud_tea_with_dried_pink_rose_buds.jpg"
   },
   {
+    "name": "rosehip",
+    "file": "rosehip.webp",
+    "credit": "Photo: Chmee2, CC BY 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Drying_of_Rose_hips_for_tea_(7).JPG"
+  },
+  {
+    "name": "rosemary",
+    "file": "rosemary.webp",
+    "credit": "Photo: HaJunkiyada, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Rosemary.jpg"
+  },
+  {
+    "name": "safflower",
+    "file": "safflower.webp",
+    "credit": "Photo: Pseudoanas, Public domain, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Carthamus_tinctorius_050709a.JPG"
+  },
+  {
+    "name": "saffron",
+    "file": "saffron.webp",
+    "credit": "Photo: Rainer Zenz, Public domain, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Iran_saffron_threads.jpg"
+  },
+  {
+    "name": "sage",
+    "file": "sage.webp",
+    "credit": "Photo: Agnieszka Kwiecień, Nova, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Salvia_officinalis_Sza%C5%82wia_lekarska_2024-01-21_Malaga_02.jpg"
+  },
+  {
     "name": "sea buckthorn",
     "file": "sea-buckthorn.webp",
     "credit": "Photo: Hans Hillewaert, CC BY-SA 3.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Hippophae_rhamnoides.jpg"
+  },
+  {
+    "name": "sencha",
+    "file": "sencha.webp",
+    "credit": "Photo: Difference engine, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:2017_Kagoshima_sencha.jpg"
+  },
+  {
+    "name": "spearmint",
+    "file": "spearmint.webp",
+    "credit": "Photo: David J. Stang, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Mentha_spicata_7zz.jpg"
   },
   {
     "name": "star anise",
@@ -300,16 +642,40 @@
     "source": "https://commons.wikimedia.org/wiki/File:Illicium_verum20170511_7548.jpg"
   },
   {
+    "name": "strawberry",
+    "file": "strawberry.webp",
+    "credit": "Photo: FoeNyx, France, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:FraiseFruitPhoto.jpg"
+  },
+  {
+    "name": "sunflower petals",
+    "file": "sunflower-petals.webp",
+    "credit": "Photo: Audrey from Central Pennsylvania, USA, CC BY 2.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Pretty_Sunflower_Petals_(194747518).jpg"
+  },
+  {
     "name": "sweet woodruff",
     "file": "sweet-woodruff.webp",
     "credit": "Photo: Krzysztof Ziarnek, Kenraiz, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Galium_odoratum_kz03.jpg"
   },
   {
+    "name": "thyme",
+    "file": "thyme.webp",
+    "credit": "Photo: Daniel78, CC BY-SA 3.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Spice_thyme.jpg"
+  },
+  {
     "name": "timut pepper",
     "file": "timut-pepper.webp",
     "credit": "Photo: Alpsdake, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:Zanthoxylum_armatum_var._subtrifoliatum_(fruits_s6).jpg"
+  },
+  {
+    "name": "turmeric",
+    "file": "turmeric.webp",
+    "credit": "Photo: formulatehealth, CC BY 2.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Turmeric_Root_and_Turmeric_Powder.jpg"
   },
   {
     "name": "vanilla",
@@ -322,6 +688,12 @@
     "file": "white-tea.webp",
     "credit": "Photo: Pannet, CC BY-SA 4.0, via Wikimedia Commons",
     "source": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B0%D0%B9%D1%85%D0%B0%D0%BE_%D0%98%D0%BD%D1%8C%D1%87%D0%B6%D1%8D%D0%BD%D1%8C.jpg"
+  },
+  {
+    "name": "yerba mate",
+    "file": "yerba-mate.webp",
+    "credit": "Photo: Siarhei Besarab, CC BY-SA 4.0, via Wikimedia Commons",
+    "source": "https://commons.wikimedia.org/wiki/File:Traditional_mate_set_calabash_gourd_with_La_Merced_yerba_mate.jpg"
   },
   {
     "name": "yuzu",

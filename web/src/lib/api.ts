@@ -20,7 +20,7 @@ export type RatingInput = Record<ScoreField, number | null> & {
 export type Rating = RatingInput & { participant: Participant | null; is_mine: boolean; updated_at: string | null }
 
 export type IngredientRef = { id: string; name: string; image_url: string | null; image_credit: string | null; image_source: string | null }
-export type Ingredient = IngredientRef & { tea_count: number }
+export type Ingredient = IngredientRef & { tea_count: number; built_in: boolean }
 
 export type CatalogTea = {
   id: string

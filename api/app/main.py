@@ -16,8 +16,8 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Ingredients created before their photo shipped get it here, so adding a photo needs no
-    # data migration: drop the file in, list it in ingredient_photos.json, deploy.
+    # Listed ingredients are created and given their photo here, so adding one needs no data
+    # migration: drop the file in, list it in ingredient_photos.json, deploy.
     async with SessionLocal.begin() as db:
         await fill_known_photos(db)
     yield

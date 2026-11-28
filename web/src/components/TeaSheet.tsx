@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
-import { api, SCORE_FIELDS, shownTea, teaInput, type Participant, type Rating, type RatingInput, type Tasting } from '../lib/api'
+import { api, SCORE_FIELDS, shownTea, teaInput, type Participant, type IngredientRef, type Rating, type RatingInput, type Tasting } from '../lib/api'
 import { flag } from '../lib/countries'
 import { fmt } from '../lib/format'
 import { useIngredients, useShops } from '../lib/queries'
 import { Explain } from './Explain'
 import { IngredientPhoto } from './IngredientPhoto'
+import { IngredientSheet } from './IngredientSheet'
 import { KindIcon } from './KindIcon'
 import { RatingForm } from './RatingForm'
 import { Sheet } from './Sheet'
@@ -33,6 +34,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
   const [confirmDialog, confirm] = useConfirm()
   const [showNotes, setShowNotes] = useState(false)
   const known = useIngredients(token).data ?? []
+  const [openIngredient, setOpenIngredient] = useState<IngredientRef | null>(null)
   const shops = useShops(token).data ?? []
   const refresh = () => {
     for (const key of [['teas', slug], ['analytics', slug], ['catalog']])
@@ -123,10 +125,10 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
           {tea && tea.ingredients.length > 0 && (
             <div className="info chips" aria-label="Ingredients">
               {tea.ingredients.map((i) => (
-                <span className="chip" key={i.id}>
-                  <IngredientPhoto ingredient={i} size={22} />
+                <button type="button" className="chip chip-button" key={i.id} onClick={() => setOpenIngredient(i)}>
+                  <IngredientPhoto ingredient={i} size={22} zoomable={false} />
                   {i.name}
-                </span>
+                </button>
               ))}
             </div>
           )}
@@ -312,6 +314,7 @@ export function TeaSheet({ slug, token, me, tasting, index, blind, hideScores, o
         </>
       )}
       {confirmDialog}
+      <IngredientSheet token={token} ingredient={openIngredient} onClose={() => setOpenIngredient(null)} />
     </Sheet>
   )
 }

@@ -63,3 +63,34 @@ def test_every_listed_photo_ships_with_a_credit():
         assert (WEB_PHOTOS / photo["file"]).is_file(), photo["file"]
         assert photo["credit"].strip(), photo["name"]
         assert photo["source"].startswith("https://commons.wikimedia.org/"), photo["name"]
+
+
+async def test_startup_creates_listed_ingredients_nobody_used_yet(client, monkeypatch):
+    slug, me, _ = await setup_two(client)
+    monkeypatch.setattr(photos, "KNOWN_PHOTOS", {"rose": ROSE})
+    async with SessionLocal.begin() as db:
+        await fill_known_photos(db)
+        await fill_known_photos(db)
+    found = await ingredients(client, me)
+    assert list(found) == ["Rose"]
+    assert found["Rose"]["tea_count"] == 0
+    assert found["Rose"]["image_url"] == "/ingredients/rose.webp"
+
+
+async def test_built_in_ingredients_cannot_be_renamed_or_deleted(client, rose_photo):
+    slug, me, _ = await setup_two(client)
+    await add_new_tea(client, slug, me, "A", ["Rose", "Rosa"])
+    found = await ingredients(client, me)
+    assert found["Rose"]["built_in"] is True
+    assert found["Rosa"]["built_in"] is False
+    rose = f"/api/catalog/ingredients/{found['Rose']['id']}"
+
+    assert (await client.delete(rose, headers=auth(me))).status_code == 409
+    renamed = await client.patch(rose, json={"name": "Wild rose"}, headers=auth(me))
+    assert renamed.status_code == 409
+    recased = await client.patch(rose, json={"name": "rose"}, headers=auth(me))
+    assert recased.json()["ingredient"]["name"] == "rose"
+
+    rosa = f"/api/catalog/ingredients/{found['Rosa']['id']}"
+    merged = await client.patch(rosa, json={"name": "Rose"}, headers=auth(me))
+    assert merged.json()["merged"] is True

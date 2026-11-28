@@ -9,6 +9,11 @@
 In the tea form, type in **Ingredients**. Pick a suggestion, or press Enter to add a new one. You
 can paste a list separated by commas.
 
+## See which teas have an ingredient
+
+Tap an ingredient's name in **Catalog** → **Ingredients**, or tap an ingredient on a tea. A panel
+shows its photo and every tea in the catalog that contains it. Tap a tea there to open it.
+
 ## Fix typos
 
 Open **Catalog** (in the bar at the top) → **Ingredients** tab.
@@ -17,6 +22,8 @@ Open **Catalog** (in the bar at the top) → **Ingredients** tab.
 - Renaming to a name that already exists **merges** the two. For example, renaming "Rosa" to "Rose"
   moves every tea with "Rosa" over to "Rose".
 - **Delete** removes the ingredient from every tea that lists it.
+- Ingredients with a photo come with the app, so they have no Rename or Delete. You can still
+  rename a typo *onto* one of them, which merges the two.
 
 ## Photos
 
@@ -27,3 +34,5 @@ full-size photo on Wikimedia Commons.
 - The photos come from **Wikimedia Commons**, a free library of photos anyone may reuse with credit.
 - The author and license are shown under each photo in the Ingredients tab.
 - An ingredient without a photo simply shows its name.
+- Over a hundred common ingredients (matcha, chamomile, rosehip…) are in the catalog from the
+  start, so you can pick them before any tea uses them.
