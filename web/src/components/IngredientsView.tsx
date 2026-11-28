@@ -5,10 +5,12 @@ import { api, type Ingredient } from '../lib/api'
 import { useIngredients } from '../lib/queries'
 import { useConfirm } from './Confirm'
 import { IngredientPhoto } from './IngredientPhoto'
+import { IngredientSheet } from './IngredientSheet'
 
 export function IngredientsView({ token, search }: { token: string; search: string }) {
   const { data, error, isPending } = useIngredients(token)
   const [message, setMessage] = useState<string | null>(null)
+  const [opened, setOpened] = useState<Ingredient | null>(null)
 
   if (isPending) return <p className="muted">Loading…</p>
   if (error) return <p className="error">{error.message}</p>
@@ -30,17 +32,29 @@ export function IngredientsView({ token, search }: { token: string; search: stri
       ) : (
         <ul className="agreement">
           {shown.map((ingredient) => (
-            <IngredientRow key={ingredient.id} token={token} ingredient={ingredient} onMessage={setMessage} />
+            <IngredientRow
+              key={ingredient.id}
+              token={token}
+              ingredient={ingredient}
+              onMessage={setMessage}
+              onOpen={() => setOpened(ingredient)}
+            />
           ))}
         </ul>
       )}
+      <IngredientSheet token={token} ingredient={opened} onClose={() => setOpened(null)} />
     </section>
   )
 }
 
-type RowProps = { token: string; ingredient: Ingredient; onMessage: (message: string | null) => void }
+type RowProps = {
+  token: string
+  ingredient: Ingredient
+  onMessage: (message: string | null) => void
+  onOpen: () => void
+}
 
-function IngredientRow({ token, ingredient, onMessage }: RowProps) {
+function IngredientRow({ token, ingredient, onMessage, onOpen }: RowProps) {
   const queryClient = useQueryClient()
   const [mode, setMode] = useState<'view' | 'rename'>('view')
   const [confirmDialog, confirm] = useConfirm()
@@ -107,7 +121,7 @@ function IngredientRow({ token, ingredient, onMessage }: RowProps) {
     <li>
       <span className="ingredient-head">
         <IngredientPhoto ingredient={ingredient} size={44} />
-        <span className="tea-main">
+        <button type="button" className="tea-main link-button" onClick={onOpen}>
           <b className="strong">{ingredient.name}</b>
           <span className="tea-sub">
             {ingredient.tea_count === 0
@@ -115,7 +129,7 @@ function IngredientRow({ token, ingredient, onMessage }: RowProps) {
               : `In ${ingredient.tea_count} ${ingredient.tea_count === 1 ? 'tea' : 'teas'}`}
           </span>
           {ingredient.image_credit && <span className="photo-credit">{ingredient.image_credit}</span>}
-        </span>
+        </button>
       </span>
       <span className="actions">
           <button className="ghost small" onClick={() => setMode('rename')}>

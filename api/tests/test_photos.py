@@ -63,3 +63,15 @@ def test_every_listed_photo_ships_with_a_credit():
         assert (WEB_PHOTOS / photo["file"]).is_file(), photo["file"]
         assert photo["credit"].strip(), photo["name"]
         assert photo["source"].startswith("https://commons.wikimedia.org/"), photo["name"]
+
+
+async def test_startup_creates_listed_ingredients_nobody_used_yet(client, monkeypatch):
+    slug, me, _ = await setup_two(client)
+    monkeypatch.setattr(photos, "KNOWN_PHOTOS", {"rose": ROSE})
+    async with SessionLocal.begin() as db:
+        await fill_known_photos(db)
+        await fill_known_photos(db)
+    found = await ingredients(client, me)
+    assert list(found) == ["Rose"]
+    assert found["Rose"]["tea_count"] == 0
+    assert found["Rose"]["image_url"] == "/ingredients/rose.webp"

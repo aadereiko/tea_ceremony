@@ -9,6 +9,11 @@
 In the tea form, type in **Ingredients**. Pick a suggestion, or press Enter to add a new one. You
 can paste a list separated by commas.
 
+## See which teas have an ingredient
+
+Tap an ingredient's name in **Catalog** → **Ingredients**, or tap an ingredient on a tea. A panel
+shows its photo and every tea in the catalog that contains it. Tap a tea there to open it.
+
 ## Fix typos
 
 Open **Catalog** (in the bar at the top) → **Ingredients** tab.
